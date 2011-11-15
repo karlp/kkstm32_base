@@ -294,19 +294,11 @@ extern "C" {
         uint32_t chip_id;
         int core_stat;
 
-#define STM32_FLASH_PGSZ 1024
-#define STM32L_FLASH_PGSZ 256
-
-#define STM32F4_FLASH_PGSZ 16384
-#define STM32F4_FLASH_SIZE (128 * 1024 * 8)
-
         stm32_addr_t flash_base;
         size_t flash_size;
         size_t flash_pgsz;
 
         /* sram settings */
-#define STM32_SRAM_SIZE (8 * 1024)
-#define STM32L_SRAM_SIZE (16 * 1024)
         stm32_addr_t sram_base;
         size_t sram_size;
         
@@ -316,8 +308,6 @@ extern "C" {
 
         struct stlink_version_ version;
     };
-
-    //stlink_t* stlink_quirk_open(const char *dev_name, const int verbose);
 
     // delegated functions...
     void stlink_enter_swd_mode(stlink_t *sl);
