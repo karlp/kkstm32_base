@@ -1,0 +1,5 @@
+LIB = libstm32_stdperiph_f4xx.a
+PLATFORM=stm32f4xx
+CFLAGS+= -mcpu=cortex-m4
+
+include Makefile.common

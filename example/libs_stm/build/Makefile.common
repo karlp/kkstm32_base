@@ -10,7 +10,7 @@ INC_PLATFORM=../inc/$(PLATFORM)
 SRC_PLATFORM=../src/$(PLATFORM)
 
 CFLAGS += -Wall -O2 -mlittle-endian -mthumb
-CFLAGS += -mcpu=cortex-m3 -ffreestanding -nostdlib -nostdinc
+CFLAGS += -ffreestanding -nostdlib -nostdinc
 CFLAGS += -I$(INC_PLATFORM) -I$(INC_DEVICE_SUPPORT) -I$(INC_CORE_SUPPORT) -I../inc/base
 
 SRCS=$(wildcard $(SRC_PLATFORM)/*.c)
