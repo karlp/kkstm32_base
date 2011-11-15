@@ -1,4 +1,6 @@
 /nbproject
+.cproject
+.project
 *.o
 *.elf
 doc/tutorial/*.log
