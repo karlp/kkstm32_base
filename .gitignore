@@ -1,4 +1,4 @@
-/nbproject/private/
+/nbproject
 *.o
 *.elf
 doc/tutorial/*.log
