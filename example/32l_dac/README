@@ -1,0 +1,7 @@
+This is a known working example, for the STM32L Discovery board.
+
+http://www.st.com/internet/evalboard/product/250990.jsp
+
+You should see the green and blue LEDs blink, and PA4 should be slowly rising
+10mV per LED state change, showing off the DAC
+

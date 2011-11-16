@@ -35,6 +35,6 @@ clean:
 	rm -rf $(BIN_IMAGE)
 
 write: all
-	sudo ../../flash/flash write ./dac.bin 0x08000000
+	../../flash/flash write $(BIN_IMAGE) 0x08000000
 
 .PHONY: all clean write
