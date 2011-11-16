@@ -331,7 +331,7 @@ static void __attribute__((naked)) __attribute__((used)) main(void)
   while (1)
   {
     /* switch_leds_on(); */
-    GPIO_HIGH(LD_GPIO_PORT, LD_GREEN_GPIO_PIN);	
+    GPIO_LOW(LD_GPIO_PORT, LD_GREEN_GPIO_PIN);
     GPIO_HIGH(LD_GPIO_PORT, LD_BLUE_GPIO_PIN);
 
     LCD_GLASS_Clear();
@@ -340,8 +340,8 @@ static void __attribute__((naked)) __attribute__((used)) main(void)
     delay();
 
     /* switch_leds_off(); */
-    GPIO_LOW(LD_GPIO_PORT, LD_GREEN_GPIO_PIN);	
-    GPIO_LOW(LD_GPIO_PORT, LD_BLUE_GPIO_PIN);	
+    GPIO_HIGH(LD_GPIO_PORT, LD_GREEN_GPIO_PIN);
+    GPIO_LOW(LD_GPIO_PORT, LD_BLUE_GPIO_PIN);
 
     LCD_GLASS_Clear();
     LCD_GLASS_DisplayString("  OFF");

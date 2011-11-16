@@ -1,0 +1,5 @@
+This should display "on" then "off" on the LCD, while the green and blue LEDs
+alternate.  The LEDs alternate to help you differentiate this example from
+32l_dac, which runs from flash and blinks the two LEDs in time.
+
+This example _should_ run from RAM.
