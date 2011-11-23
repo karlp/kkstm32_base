@@ -137,10 +137,18 @@ int parse_options(int argc, char** argv, st_state_t *st) {
     return 0;
 }
 
+/* Quick fix to make Ctrl-C not lock up interface on OXS.  Needs global
+ * variable refactoring out */
+stlink_t *sl;
+void catcher(int sig) {
+	if(sl != NULL)
+		stlink_close(sl);
+	exit(1);
+}
 
 int main(int argc, char** argv) {
 
-	stlink_t *sl = NULL;
+	sl = NULL;
 
 	st_state_t state;
 	memset(&state, 0, sizeof(state));
@@ -160,6 +168,8 @@ int main(int argc, char** argv) {
 		break;
     }
     
+	signal(SIGINT, catcher);
+
 	printf("Chip ID is %08x, Core ID is  %08x.\n", sl->chip_id, sl->core_id);
 
 	sl->verbose=0;
