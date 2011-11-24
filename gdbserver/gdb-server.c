@@ -179,6 +179,7 @@ int main(int argc, char** argv) {
 	while(serve(sl, state.listen_port) == 0);
 
 	/* Switch back to mass storage mode before closing. */
+	stlink_reset(sl);
 	stlink_run(sl);
 	stlink_exit_debug_mode(sl);
 	stlink_close(sl);
