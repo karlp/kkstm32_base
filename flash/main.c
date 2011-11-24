@@ -73,12 +73,23 @@ static int get_opts(struct opts* o, int ac, char** av)
   return 0;
 } 
 
+/* Quick fix to make Ctrl-C not lock up interface on OXS.  Needs global
+ * variable refactoring out */
+stlink_t *sl;
+void catcher(int sig) {
+	if(sl != NULL)
+		stlink_close(sl);
+	exit(1);
+}
+
 
 int main(int ac, char** av)
 {
-  stlink_t* sl = NULL;
+  sl = NULL;
   struct opts o;
   int err = -1;
+
+  signal(SIGINT, catcher);
 
   o.size = 0;
   if (get_opts(&o, ac - 1, av + 1) == -1)
