@@ -120,6 +120,13 @@ int main(int ac, char** av)
 
   stlink_reset(sl);
 
+  printf("Erasing chip entirely...");
+  stlink_erase_flash_mass(sl);
+  printf(" Done\n");
+
+  stlink_force_debug(sl);
+  stlink_reset(sl);
+
   if (o.do_read == 0) /* write */
   {
     err = stlink_fwrite_flash(sl, o.filename, o.addr);
