@@ -21,10 +21,6 @@
 
 /* boot mode */
 
-#define CONFIG_BOOT_SRAM 1
-#define CONFIG_BOOT_FLASH 0
-
-
 /* gpios
    refer to CD00277537.pdf, APB memory space.
    refer to CD00240193.pdf, GPIO.
@@ -312,8 +308,7 @@ static void Init_GPIOs(void)
 
 
 /* main */
-
-static void __attribute__((naked)) __attribute__((used)) main(void)
+static void __attribute__((naked)) __attribute__((used)) real_main(void)
 {
 #if CONFIG_BOOT_SRAM
   /* do not use previsouly setup stack, if any */
@@ -348,4 +343,8 @@ static void __attribute__((naked)) __attribute__((used)) main(void)
 
     delay();
   }
+}
+
+int main(void) {
+    real_main();
 }
