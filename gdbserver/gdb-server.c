@@ -137,10 +137,18 @@ int parse_options(int argc, char** argv, st_state_t *st) {
     return 0;
 }
 
+/* Quick fix to make Ctrl-C not lock up interface on OXS.  Needs global
+ * variable refactoring out */
+stlink_t *sl;
+void catcher(int sig) {
+	if(sl != NULL)
+		stlink_close(sl);
+	exit(1);
+}
 
 int main(int argc, char** argv) {
 
-	stlink_t *sl = NULL;
+	sl = NULL;
 
 	st_state_t state;
 	memset(&state, 0, sizeof(state));
@@ -160,6 +168,8 @@ int main(int argc, char** argv) {
 		break;
     }
     
+	signal(SIGINT, catcher);
+
 	printf("Chip ID is %08x, Core ID is  %08x.\n", sl->chip_id, sl->core_id);
 
 	sl->verbose=0;
@@ -169,6 +179,7 @@ int main(int argc, char** argv) {
 	while(serve(sl, state.listen_port) == 0);
 
 	/* Switch back to mass storage mode before closing. */
+	stlink_reset(sl);
 	stlink_run(sl);
 	stlink_exit_debug_mode(sl);
 	stlink_close(sl);
@@ -688,6 +699,49 @@ int serve(stlink_t *sl, int port) {
 						strncpy(&reply[1], data, length);
 					}
 				}
+			} else if(!strncmp(queryName, "Rcmd,",4)) {
+				// Rcmd uses the wrong separator
+				char *separator = strstr(packet, ","), *params = "";
+				if(separator == NULL) {
+					separator = packet + strlen(packet);
+				} else {
+					params = separator + 1;
+				}
+				
+
+				if (!strncmp(params,"72657375",8)) {// resume
+#ifdef DEBUG
+					printf("Rcmd: resume\n");
+#endif
+					stlink_run(sl);
+
+					reply = strdup("OK");
+				} else if (!strncmp(params,"6861",4)) { //half
+					reply = strdup("OK");
+					
+					stlink_force_debug(sl);
+
+#ifdef DEBUG
+					printf("Rcmd: halt\n");
+#endif
+				} else if (!strncmp(params,"72657365",8)) { //reset
+					reply = strdup("OK");
+					
+					stlink_force_debug(sl);
+					stlink_reset(sl);
+					init_code_breakpoints(sl);
+					init_data_watchpoints(sl);
+					
+#ifdef DEBUG
+					printf("Rcmd: reset\n");
+#endif
+				} else {
+#ifdef DEBUG
+					printf("Rcmd: %s\n", params);
+#endif
+
+				}
+				
 			}
 
 			if(reply == NULL)
