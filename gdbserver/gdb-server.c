@@ -140,10 +140,12 @@ int parse_options(int argc, char** argv, st_state_t *st) {
 /* Quick fix to make Ctrl-C not lock up interface on OXS.  Needs global
  * variable refactoring out */
 stlink_t *sl;
-void catcher(int sig) {
-	if(sl != NULL)
-		stlink_close(sl);
-	exit(1);
+void catcher(int sig)
+{
+    if (sl != NULL) {
+        stlink_close(sl);
+    }
+    raise(sig);
 }
 
 int main(int argc, char** argv) {

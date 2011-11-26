@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <signal.h>
 #include "stlink-common.h"
 
 
@@ -71,15 +72,17 @@ static int get_opts(struct opts* o, int ac, char** av)
   o->addr = strtoul(av[i + 2], NULL, 16);
 
   return 0;
-} 
+}
 
 /* Quick fix to make Ctrl-C not lock up interface on OXS.  Needs global
  * variable refactoring out */
 stlink_t *sl;
-void catcher(int sig) {
-	if(sl != NULL)
-		stlink_close(sl);
-	exit(1);
+void catcher(int sig)
+{
+    if (sl != NULL) {
+        stlink_close(sl);
+    }
+    raise(sig);
 }
 
 
