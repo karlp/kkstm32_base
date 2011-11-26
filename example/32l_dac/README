@@ -5,3 +5,8 @@ http://www.st.com/internet/evalboard/product/250990.jsp
 You should see the green and blue LEDs blink, and PA4 should be slowly rising
 10mV per LED state change, showing off the DAC
 
+If you get an error like, "cannot find -lstm32_stdperiph_l1xx", you haven't
+built the stm32 stdperiph libraries yet...
+
+make -C ../libs_stm/build/ then try building again
+
