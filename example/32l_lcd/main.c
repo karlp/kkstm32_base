@@ -6,6 +6,7 @@
 #include "stdint.h"
 
 /* libstm32l_discovery headers */
+#include "misc.h"
 #include "stm32l1xx_gpio.h"
 #include "stm32l1xx_adc.h"
 #include "stm32l1xx_lcd.h"
@@ -141,28 +142,21 @@ static void RCC_Configuration(void)
   }
 }
 
-static void Init_GPIOs(void)
+void Init_GPIOs(void)
 {
-#if 0 /* fixme: GPIO_Init raises a bug in some gcc toolchains */
-
   /* GPIO, EXTI and NVIC Init structure declaration */
   GPIO_InitTypeDef GPIO_InitStructure;
 
-#if 0
   EXTI_InitTypeDef EXTI_InitStructure;
   NVIC_InitTypeDef NVIC_InitStructure;
-#endif
 
-#if 0
   /* Configure User Button pin as input */
   GPIO_InitStructure.GPIO_Pin = USERBUTTON_GPIO_PIN;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_40MHz;
   GPIO_Init(USERBUTTON_GPIO_PORT, &GPIO_InitStructure);
-#endif
 
-#if 0
   /* Select User Button pin as input source for EXTI Line */
   SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA,EXTI_PinSource0);
 
@@ -179,9 +173,7 @@ static void Init_GPIOs(void)
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0F;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure); 
-#endif
 
-#if 0
   /* Configure the LED_pin as output push-pull for LD3 & LD4 usage*/
   GPIO_InitStructure.GPIO_Pin = LD_GREEN_GPIO_PIN | LD_BLUE_GPIO_PIN;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
@@ -233,9 +225,7 @@ static void Init_GPIOs(void)
   GPIO_PinAFConfig(GPIOB, GPIO_PinSource13,GPIO_AF_LCD) ;   
   GPIO_PinAFConfig(GPIOB, GPIO_PinSource14,GPIO_AF_LCD) ;
   GPIO_PinAFConfig(GPIOB, GPIO_PinSource15,GPIO_AF_LCD) ;   
-#endif
 
-#if 0  
   /* Configure Port C LCD Output pins as alternate function */ 
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_6 \
                                  | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 |GPIO_Pin_11 ;                               
@@ -253,57 +243,12 @@ static void Init_GPIOs(void)
   GPIO_PinAFConfig(GPIOC, GPIO_PinSource9,GPIO_AF_LCD) ;
   GPIO_PinAFConfig(GPIOC, GPIO_PinSource10,GPIO_AF_LCD) ; 
   GPIO_PinAFConfig(GPIOC, GPIO_PinSource11,GPIO_AF_LCD) ;  
-#endif
   
-#if 0
   /* Configure ADC (IDD_MEASURE) pin as Analogue */
   GPIO_InitStructure.GPIO_Pin = IDD_MEASURE  ;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;
   GPIO_Init( IDD_MEASURE_PORT, &GPIO_InitStructure);
-#endif
 
-#else /* fixme */
-
-  /* set every port in digital output mode  */
-
-  /* PA[1:3,8:10,15] */
-  *(volatile uint32_t*)GPIOA_MODER |=
-    (GPIO_Mode_AF << (1 * 2)) |
-    (GPIO_Mode_AF << (2 * 2)) |
-    (GPIO_Mode_AF << (3 * 2)) |
-    (GPIO_Mode_AF << (8 * 2)) |
-    (GPIO_Mode_AF << (9 * 2)) |
-    (GPIO_Mode_AF << (10 * 2)) |
-    (GPIO_Mode_AF << (15 * 2));
-
-  /* PB[3:5,8:15] */
-  *(volatile uint32_t*)GPIOB_MODER |=
-    (GPIO_Mode_AF << (3 * 2)) |
-    (GPIO_Mode_AF << (4 * 2)) |
-    (GPIO_Mode_AF << (5 * 2)) |
-    (GPIO_Mode_AF << (8 * 2)) |
-    (GPIO_Mode_AF << (9 * 2)) |
-    (GPIO_Mode_AF << (10 * 2)) |
-    (GPIO_Mode_AF << (11 * 2)) |
-    (GPIO_Mode_AF << (12 * 2)) |
-    (GPIO_Mode_AF << (13 * 2)) |
-    (GPIO_Mode_AF << (14 * 2)) |
-    (GPIO_Mode_AF << (15 * 2));
-
-  /* PC[0:3,6:11] */
-  *(volatile uint32_t*)GPIOC_MODER |=
-    (GPIO_Mode_AF << (0 * 2)) |
-    (GPIO_Mode_AF << (1 * 2)) |
-    (GPIO_Mode_AF << (2 * 2)) |
-    (GPIO_Mode_AF << (3 * 2)) |
-    (GPIO_Mode_AF << (6 * 2)) |
-    (GPIO_Mode_AF << (7 * 2)) |
-    (GPIO_Mode_AF << (8 * 2)) |
-    (GPIO_Mode_AF << (9 * 2)) |
-    (GPIO_Mode_AF << (10 * 2)) |
-    (GPIO_Mode_AF << (11 * 2));
-
-#endif /* fixme */
 }
 
 

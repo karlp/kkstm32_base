@@ -1,5 +1,12 @@
-This should display "on" then "off" on the LCD, while the green and blue LEDs
-alternate.  The LEDs alternate to help you differentiate this example from
-32l_dac, which runs from flash and blinks the two LEDs in time.
+Status: 
 
-This example _should_ run from RAM.
+    From Flash: working
+    From SRAM: doutbful...
+
+This displays "on" then "off" on the LCD, while the green and blue LEDs
+alternate.  The LEDs alternate to help you differentiate this example from
+32l_dac, which blinks the two LEDs in time.
+
+This will run from flash by default, which has been verified to work.  Running
+from SRAM allegedly works, but is not fully tested.
+
