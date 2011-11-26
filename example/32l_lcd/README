@@ -10,3 +10,5 @@ alternate.  The LEDs alternate to help you differentiate this example from
 This will run from flash by default, which has been verified to work.  Running
 from SRAM allegedly works, but is not fully tested.
 
+Requires the stdperiph driver for STM32L1xx to be built, see
+../libs_stm/build, or just run: make -C ../libs_stm/build
