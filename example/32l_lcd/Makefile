@@ -1,6 +1,10 @@
-ELF=lcd.elf
+TARGET=lcd
+
+ELF=$(TARGET).elf
+BIN_IMAGE=$(TARGET).bin
 
 CC=arm-none-eabi-gcc
+OBJCOPY=arm-none-eabi-objcopy
 DEBUG?=1
 
 CFLAGS=-O2 -mlittle-endian -mthumb
@@ -29,6 +33,11 @@ else
 	CFLAGS+=-DCONFIG_BOOT_SRAM=1
 endif
 
+## tricksy....
+ifneq ($(USER),"")
+	CFLAGS+=-DSURPRISE_STRING=\"$(USER)\"
+endif
+
 LDFLAGS+=-L$(LIBS_STM_PATH)/build -lstm32_stdperiph_l1xx
 
 SRCS=\
@@ -37,12 +46,19 @@ stm32l_discovery_lcd.c\
 system_stm32l1xx.c\
 startup_stm32l1xx_md.s
 
-all: $(ELF)
+all: $(BIN_IMAGE)
+
+$(BIN_IMAGE): $(ELF)
+	$(OBJCOPY) -O binary $^ $@
 
 $(ELF): $(SRCS)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 clean:
+	-rm -f $(BIN_IMAGE)
 	-rm -f $(ELF)
+
+write: all
+	../../flash/flash write $(BIN_IMAGE) 0x08000000
 
 .PHONY: all clean

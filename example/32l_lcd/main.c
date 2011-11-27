@@ -36,7 +36,6 @@
 #define GPIOC_MODER (GPIOC_BASE + 0x00)
 #define GPIOC_ODR (GPIOC_BASE + 0x14)
 
-
 /* leds */
 
 #define LED_BLUE (1 << 6) /* port B, pin 6 */
@@ -275,16 +274,20 @@ static void __attribute__((naked)) __attribute__((used)) real_main(void)
     GPIO_HIGH(LD_GPIO_PORT, LD_BLUE_GPIO_PIN);
 
     LCD_GLASS_Clear();
-    LCD_GLASS_DisplayString("ON   ");
-
+#ifdef SURPRISE_STRING
+    LCD_GLASS_ScrollSentence("       hello " SURPRISE_STRING, 1, 500);
+#else
+    LCD_GLASS_DisplayString("ON    ");
     delay();
-
+#endif
     /* switch_leds_off(); */
     GPIO_HIGH(LD_GPIO_PORT, LD_GREEN_GPIO_PIN);
     GPIO_LOW(LD_GPIO_PORT, LD_BLUE_GPIO_PIN);
 
+#ifndef SURPRISE_STRING
     LCD_GLASS_Clear();
     LCD_GLASS_DisplayString("  OFF");
+#endif
 
     delay();
   }

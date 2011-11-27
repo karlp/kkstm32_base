@@ -208,14 +208,17 @@ void LCD_GLASS_Configure_GPIO(void)
 }
 
 /**
-  * @brief  LCD contrast setting min-->max-->min by pressing user button
-  * @param  None
-  * @retval None
-  */
-
+ * @brief  LCD contrast setting min-->max-->min by pressing user button
+ * @param  None
+ * @retval None
+ */
 static void Delay(uint32_t nTime)
 {
-  while((nTime--) != 0); 
+    while (nTime--) {
+        register unsigned int i;
+        for (i = 0; i < 1000; ++i)
+            __asm__ __volatile__("nop\n\t":: : "memory");
+    }
 }
 
 void LCD_contrast()
