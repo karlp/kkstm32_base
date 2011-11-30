@@ -40,38 +40,51 @@ static inline void switch_leds_off(void)
   GPIO_LOW(GPIOB, LED_GREEN);	
   GPIO_LOW(GPIOB, LED_BLUE);
 }
-
-// Note, this uses very specific stm32 library methods, not CMSIS routines...
-static void RCC_Configuration_HSI(void)
+/**
+ * We want to use the ADC in this app, which needs the HSI, which runs at 16MHz,
+ * by default the 32L starts up in voltage range 2, which only allows 8Mhz 
+ * without inserting wait states for flash and so on.
+ */
+void SystemInit(void)
 {
-    // TODO - to use the 16mhz clock, with no wait states or other special flash config,
-    // we need to ramp up to the full 1.8V core.
-    
-  /* HSI is 16mhz RC clock directly fed to SYSCLK (rm00038, figure 9) */
+    // we need clocks to reach the power part...
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN;
 
-  /* enable the HSI clock (high speed internal) */
-  RCC_HSICmd(ENABLE);
-  
-  /* wail til HSI ready */
-  while (RCC_GetFlagStatus(RCC_FLAG_HSIRDY) == RESET)
-      ;
+    /* Select the Voltage Range 1 (1.8 V) */
+    PWR->CR = PWR_CR_VOS_0;
 
-  /* now switch to this source */
-  RCC_SYSCLKConfig(RCC_SYSCLKSource_HSI);
+    /* Wait Until the Voltage Regulator is ready */
+    while ((PWR->CSR & PWR_CSR_VOSF) != RESET)
+        ;
 
-  // Turn off unneeded clocks...
-  // We're not using LSE yet, but we might want to experiment with it...
-  RCC_HSEConfig(RCC_HSE_OFF);  
-  RCC_LSICmd(DISABLE);
-  RCC_MSICmd(DISABLE);
-  RCC_PLLCmd(DISABLE);
-  // we don't really need to wait for them to shut down...
-/*
-  if (RCC_GetFlagStatus(RCC_FLAG_HSERDY) != RESET)
-  {
-    while (1) ;
-  }
-*/
+    /* HSI is 16mhz RC clock directly fed to SYSCLK (rm00038, figure 9) */
+
+//#define USE_RAW_CMSIS
+#ifdef USE_RAW_CMSIS
+    // Do it all by hand with RCC->CR and so on...
+#else // use stm32 lib methods...
+    /* enable the HSI clock (high speed internal) */
+    RCC_HSICmd(ENABLE);
+
+    /* wail til HSI ready */
+    while (RCC_GetFlagStatus(RCC_FLAG_HSIRDY) == RESET)
+        ;
+
+    /* now switch to this source */
+    RCC_SYSCLKConfig(RCC_SYSCLKSource_HSI);
+
+    // Turn off unneeded clocks...
+    // We're not using LSE yet, but we might want to experiment with it...
+    RCC_HSEConfig(RCC_HSE_OFF);
+    RCC_LSICmd(DISABLE);
+    RCC_MSICmd(DISABLE);
+    RCC_PLLCmd(DISABLE);
+#endif
+    // we don't really need to wait for them to shut down...
+
+    // not sure how to use this yet...
+    // SCB->VTOR = SRAM_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM. */
+    //SCB->VTOR = FLASH_BASE | 0x0; /* Vector Table Relocation in Internal FLASH. */
 }
 
 volatile uint64_t ksystick;
@@ -85,41 +98,22 @@ void SysTick_Handler(void) {
 }
 
 
-volatile uint64_t loopcount = 0;
-
-void SystemInit(void) {
-    // not sure how to use this yet...
-    // SCB->VTOR = SRAM_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM. */
-    //SCB->VTOR = FLASH_BASE | 0x0; /* Vector Table Relocation in Internal FLASH. */
-}
-
-int main(void)
-{
+int main(void) {
   static GPIO_InitTypeDef GPIO_InitStructure;
   static unsigned int led_state = 0;
   
-  // Need this if we want to use the ADC :)
-  // RCC_Configuration_HSI();
-  
   RCC_ClocksTypeDef clockinfo;
   RCC_GetClocksFreq(&clockinfo);
-  // Should be 16Mhz, we want 1ms, and there's 1000 of them in a second.
+  // regardless of clock speed this gives us 1000 ticks per second
   SysTick_Config(clockinfo.SYSCLK_Frequency / 1000);
   
   // So, what is our clock...?
   int blink_speed_ms;
-/*
   if (clockinfo.SYSCLK_Frequency > (9 * 1000 * 1000)) {
       // probably running on something highspeed, like HSI
       blink_speed_ms = 75;
   } else {
       blink_speed_ms = 1500;
-  }
-*/
-  if (RCC_GetSYSCLKSource() == 0) {
-      blink_speed_ms = 200;
-  } else {
-      blink_speed_ms = 2000;
   }
   
   /* configure gpios */
@@ -143,11 +137,10 @@ int main(void)
   // setup my own green led... on PC3
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
   GPIO_Init(GPIOC, &GPIO_InitStructure);
-  // setup my own reed led... on PA4
+  // setup my own red led... on PA4
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
   
-#if 0  
   // Setup an adc...
   ADC_InitTypeDef adcinit;
   
@@ -169,11 +162,9 @@ int main(void)
   /* Wait until ADC1 ON status */
   while (ADC_GetFlagStatus(ADC1, ADC_FLAG_ADONS) == RESET)
     ;
-#endif  
 
     uint64_t lasttime = millis();
     while (1) {
-        loopcount++;
         if (millis() - blink_speed_ms > lasttime) {
             if (led_state & 1) {
                 switch_leds_on();
@@ -185,7 +176,6 @@ int main(void)
             lasttime = millis();
         }
 
-#if 0
         // start and wait for adc to convert...
         ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 1, ADC_SampleTime_192Cycles);
         ADC_SoftwareStartConv(ADC1);
@@ -198,6 +188,5 @@ int main(void)
         } else {
             GPIO_LOW(GPIOA, GPIO_Pin_4);
         }
-#endif
     }
 }
