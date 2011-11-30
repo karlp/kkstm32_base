@@ -12,6 +12,7 @@ DEBUG?=1
 CFLAGS=-Os -mlittle-endian -mthumb
 CFLAGS+=-mcpu=cortex-m3
 CFLAGS+=-ffreestanding -nostdlib -nostdinc
+CFLAGS+=-Wall -Wextra
 ifeq ($(DEBUG),1)
         CFLAGS+=-g
 endif
