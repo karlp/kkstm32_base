@@ -29,13 +29,14 @@ CFLAGS+=-I$(LIBS_STM_PATH)/inc/device_support
 CFLAGS+=-I$(LIBS_STM_PATH)/inc/$(PLATFORM)
 
 LDFLAGS+=-L$(LIBS_STM_PATH)/build -lstm32_stdperiph_l1xx
+LDFLAGS+=-Wl,-Map=$(TARGET).map
 
 all: $(BIN_IMAGE)
 
 $(BIN_IMAGE): $(EXECUTABLE)
 	$(OBJCOPY) -O binary $^ $@
 
-$(EXECUTABLE): main.c gen_startup.c system_stm32l1xx.c
+$(EXECUTABLE): main.c gen_startup.c
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 clean:

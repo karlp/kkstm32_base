@@ -56,6 +56,20 @@ void Dummy_Handler(void) {
     }
 }
 
+
+/**
+ * STM32L1xx starts up running on the MSI, at around 2.097MHz
+ * It also is running on "medium" power, 1.5V, with a max clock on 
+ * zero wait state flash of only 8Mhz
+ * That's enough to run, and handle setting clocks in main().
+ * Or, you can provide a SystemInit() to do that sort of thing,
+ * which will replace this routine.
+ */
+void SystemInit(void) __attribute__ ((weak));
+void SystemInit(void) {
+    ;
+}
+
 void __attribute__((noreturn, naked)) Reset_Handler() {
     unsigned long *src;
     unsigned long *dest;
