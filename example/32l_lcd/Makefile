@@ -38,6 +38,7 @@ ifneq ($(USER),"")
 	CFLAGS+=-DSURPRISE_STRING=\"$(USER)\"
 endif
 
+LDFLAGS+=-L../ld_scripts
 LDFLAGS+=-L$(LIBS_STM_PATH)/build -lstm32_stdperiph_l1xx
 
 SRCS=\
