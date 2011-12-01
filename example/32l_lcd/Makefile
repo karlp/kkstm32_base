@@ -27,7 +27,7 @@ CFLAGS+=-I$(LIBS_STM_PATH)/inc/$(PLATFORM)
 # Boot from flash, known to work, by default...
 BOOT_FLASH?=1
 ifeq ($(BOOT_FLASH),1)
-	CFLAGS+=-Wl,-T,stm32_flash.ld
+	CFLAGS+=-Wl,-T,stm32l15xxb_flash.ld
 else
 	CFLAGS+=-Wl,-T,linker_stm32l.lds
 	CFLAGS+=-DCONFIG_BOOT_SRAM=1
@@ -44,7 +44,7 @@ SRCS=\
 main.c\
 stm32l_discovery_lcd.c\
 system_stm32l1xx.c\
-startup_stm32l1xx_md.s
+cm3_genstartup.c
 
 all: $(BIN_IMAGE)
 
