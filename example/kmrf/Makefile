@@ -1,5 +1,5 @@
 TARGET=kmrf
-# all below here should not need to be touched...
+# all below here should not need to be touched...(much)
 
 
 EXECUTABLE=$(TARGET).elf
@@ -18,7 +18,7 @@ ifeq ($(DEBUG),1)
 endif
 
 # to run from FLASH
-CFLAGS+=-Wl,-T,gen_flash.ld
+CFLAGS+=-Wl,-T,stm32l15xxb_flash.ld
 
 PLATFORM=stm32l1xx
 LIBS_STM_PATH=../libs_stm
@@ -37,7 +37,7 @@ all: $(BIN_IMAGE)
 $(BIN_IMAGE): $(EXECUTABLE)
 	$(OBJCOPY) -O binary $^ $@
 
-$(EXECUTABLE): main.c gen_startup.c
+$(EXECUTABLE): main.c cm3_genstartup.c
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 clean:

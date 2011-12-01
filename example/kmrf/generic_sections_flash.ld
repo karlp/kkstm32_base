@@ -1,23 +1,18 @@
-
-ENTRY(Reset_Handler)
-
-/* 
-this is for stm32L medium 
-However, because only the _lengths_ change, we can use the sections without change...
-*/
-MEMORY
-{
-    FLASH (rx)    : ORIGIN = 0x08000000, LENGTH = 128K
-    RAM (rxw)     : ORIGIN = 0x20000000, LENGTH = 16K
-}
-
-/* _estack = ADDR(RAM) + SIZEOF(RAM); */
-PROVIDE(_estack = 0x20004000);
+/**
+ * Karl Palsson, 2011
+ * Considered to be released into the public domain
+ *
+ * Generic "boot from flash" linker script.
+ *
+ * This file simply defines how sections should get written.
+ * You should INCLUDE this file from another file, that specifies the
+ * memory map for the part you are using.
+ */
 
 SECTIONS
 {
     . = ORIGIN(FLASH);
-    .text : 
+    .text :
     {
         *(.vectors)    /* Vector table */
         *(.text)      /* Program code */
@@ -26,10 +21,12 @@ SECTIONS
         __text_end = .;
     } >FLASH
 
-    /* This is the initialized data section
-    The program executes knowing that the data is in the RAM
-    but the loader puts the initial values in the FLASH (inidata).
-    It is one task of the startup to copy the initial values from FLASH to RAM. */
+    /*
+     * This is the initialized data section
+     * The program executes knowing that the data is in the RAM
+     * but the loader puts the initial values in the FLASH (inidata).
+     * One task of "startup" is to copy the initial values from FLASH to RAM.
+     */
     .data :
     {
         /* This is used by the startup in order to initialize the .data secion */

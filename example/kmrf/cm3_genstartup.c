@@ -1,8 +1,11 @@
 /**
  * Karl Palsson, 2011.  Compiled from all sorts of sources, with wisdom
- * from places untold and untracked.  Considered to be released in the public 
+ * from places untold and untracked.  Considered to be released into the public
  * domain.
- * 
+ *
+ * This was helpful:
+ * http://dev.frozeneskimo.com/notes/getting_started_with_cortex_m3_cmsis_and_gnu_tools
+ *
  * Handles setting up data in ram, zeroing bss, and calling SystemInit for clocks
  * then jumping to main
  */
@@ -51,12 +54,18 @@ void Dummy_Handler(void) {
 
 
 /**
- * STM32L1xx starts up running on the MSI, at around 2.097MHz
- * It also is running on "medium" power, 1.5V, with a max clock on 
- * zero wait state flash of only 8Mhz
- * That's enough to run, and handle setting clocks in main().
- * Or, you can provide a SystemInit() to do that sort of thing,
- * which will replace this routine.
+ * All the parts start on some sort of an internal clock.
+ * STM32F101, 103, 105, 107 start on HSI (~8MHz)
+ * STM32F100xx (Value Line) start on HSI (~8MHz)
+ * STM32F2xx starts on HSI (~16MHz)
+ * STM32F4xx starts on HSI (~16MHz)
+ * STM32L1xx starts on MSI (~2MHz)
+ * Additionally, the STM32L1xx starts in voltage range 2 (1.5V), and needs
+ * to be switched to voltage range 1 before enabling its HSI (~16MHz)
+ *
+ * Regardless, the default startup clock is enough to run.  However, you may
+ * wish to override this function, (simply implement your own) and configure
+ * clocks, power regulators, or any other "premain" code you wish to run.
  */
 void SystemInit(void) __attribute__ ((weak));
 void SystemInit(void) {
