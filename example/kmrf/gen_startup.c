@@ -7,13 +7,6 @@
  * then jumping to main
  */
 
-
-/**
- * Expected to be provided by your application, it should initialize clocks, 
- * and all that good stuff...
- */
-extern void SystemInit(void);
-
 /**
  * Expected to be provided by your application, naturally :)
  * @return 
