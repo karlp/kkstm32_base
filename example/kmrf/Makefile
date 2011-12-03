@@ -30,6 +30,7 @@ CFLAGS+=-I$(LIBS_STM_PATH)/inc/device_support
 CFLAGS+=-I$(LIBS_STM_PATH)/inc/$(PLATFORM)
 
 LDFLAGS+=-L$(LIBS_STM_PATH)/build -lstm32_stdperiph_l1xx
+LDFLAGS+=-L../startup_files -lstm32_stdperiph_l1xx
 LDFLAGS+=-Wl,-Map=$(TARGET).map
 
 all: $(BIN_IMAGE)
@@ -37,7 +38,7 @@ all: $(BIN_IMAGE)
 $(BIN_IMAGE): $(EXECUTABLE)
 	$(OBJCOPY) -O binary $^ $@
 
-$(EXECUTABLE): main.c cm3_genstartup.c
+$(EXECUTABLE): main.c ../startup_files/cm3_genstartup.c
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 clean:
