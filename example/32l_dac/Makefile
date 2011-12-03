@@ -20,7 +20,7 @@ CFLAGS+=-I$(LIBS_STM_PATH)/inc/core_support
 CFLAGS+=-I$(LIBS_STM_PATH)/inc/device_support
 CFLAGS+=-I$(LIBS_STM_PATH)/inc/$(PLATFORM)
 
-LDFLAGS+=-L../ld_scripts
+LDFLAGS+=-L../startup_files
 LDFLAGS+=-L$(LIBS_STM_PATH)/build -lstm32_stdperiph_l1xx
 
 all: $(BIN_IMAGE)
@@ -28,7 +28,7 @@ all: $(BIN_IMAGE)
 $(BIN_IMAGE): $(EXECUTABLE)
 	$(OBJCOPY) -O binary $^ $@
 
-$(EXECUTABLE): main.c system_stm32l1xx.c cm3_genstartup.c
+$(EXECUTABLE): main.c system_stm32l1xx.c ../startup_files/cm3_genstartup.c
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 clean:

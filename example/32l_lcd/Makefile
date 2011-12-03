@@ -40,14 +40,14 @@ ifneq ($(USER),"")
 	CFLAGS+=-DSURPRISE_STRING=\"$(USER)\"
 endif
 
-LDFLAGS+=-L../ld_scripts -L.
+LDFLAGS+=-L../startup_files -L.
 LDFLAGS+=-L$(LIBS_STM_PATH)/build -lstm32_stdperiph_l1xx
 
 SRCS=\
 main.c\
 stm32l_discovery_lcd.c\
 system_stm32l1xx.c\
-cm3_genstartup.c
+../startup_files/cm3_genstartup.c
 
 all: $(BIN_IMAGE)
 
