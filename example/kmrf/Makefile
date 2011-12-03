@@ -17,8 +17,15 @@ ifeq ($(DEBUG),1)
         CFLAGS+=-g
 endif
 
-# to run from FLASH
-CFLAGS+=-Wl,-T,stm32l15xxb_flash.ld
+BOOT_FLASH?=1
+ifeq ($(BOOT_FLASH),1)
+	CFLAGS+=-Wl,-T,stm32l15xxb_flash.ld
+else
+	CFLAGS+=-Wl,-T,stm32l15xxb_sram.ld
+	CFLAGS+=-DCONFIG_BOOT_SRAM=1
+	# This keeps the standard system_xxx files from doing any damage...
+	CFLAGS+=-DVECT_TAB_SRAM
+endif
 
 PLATFORM=stm32l1xx
 LIBS_STM_PATH=../libs_stm
