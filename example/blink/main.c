@@ -1,15 +1,8 @@
-/* missing type */
-
-typedef unsigned int uint32_t;
-
-
-/* hardware configuration */
 
 #if CONFIG_STM32VL_DISCOVERY
 
-#define GPIOC 0x40011000 /* port C */
-#define GPIOC_CRH (GPIOC + 0x04) /* port configuration register high */
-#define LED_PORT_ODR (GPIOC + 0x0c) /* port output data register */
+#include "stm32f10x.h"
+#define LED_PORT GPIOC
 
 #define LED_BLUE (1 << 8) /* port C, pin 8 */
 #define LED_GREEN (1 << 9) /* port C, pin 9 */
@@ -18,14 +11,17 @@ typedef unsigned int uint32_t;
 
 static inline void setup_leds(void)
 {
-  *(volatile uint32_t*)GPIOC_CRH = 0x44444411;
+    // Make sure clocks work...
+    RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
+    // Make sure we're in mode 0, with output push-pull
+    LED_PORT->CRH |= GPIO_CRH_MODE8_0 | GPIO_CRH_MODE9_0;
+    LED_PORT->CRH &= ~(GPIO_CRH_CNF8 | GPIO_CRH_CNF9);
 }
 
 #elif CONFIG_STM32L_DISCOVERY
 
-#define GPIOB 0x40020400 /* port B */
-#define GPIOB_MODER (GPIOB + 0x00) /* port mode register */
-#define LED_PORT_ODR (GPIOB + 0x14) /* port output data register */
+#include "stm32l1xx.h"
+#define LED_PORT GPIOB
 
 #define LED_BLUE (1 << 6) /* port B, pin 6 */
 #define LED_GREEN (1 << 7) /* port B, pin 7 */
@@ -34,28 +30,29 @@ static inline void setup_leds(void)
 
 static inline void setup_leds(void)
 {
-  /* configure port 6 and 7 as output */
-  *(volatile uint32_t*)GPIOB_MODER |= (1 << (7 * 2)) | (1 << (6 * 2));
+    // Make sure clocks work..
+    RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
+    // set to outputs.
+    LED_PORT->MODER |= GPIO_MODER_MODER6_0 | GPIO_MODER_MODER7_0;
 }
 
 #elif CONFIG_STM32F4_DISCOVERY
 
-#define GPIOD 0x40020C00 /* port D */
-#define GPIOD_MODER (GPIOD + 0x00) /* port mode register */
-#define LED_PORT_ODR (GPIOD + 0x14) /* port output data register */
+#include "stm32f4xx.h"
+#define LED_PORT GPIOD
 
 #define LED_GREEN (1 << 12) /* port D, pin 12 */
 #define LED_ORANGE (1 << 13) /* port D, pin 13 */
 #define LED_RED (1 << 14) /* port D, pin 14 */
 #define LED_BLUE (1 << 15) /* port D, pin 15 */
 
-void _tmain(void) {
-	main();
-}
 static inline void setup_leds(void)
 {
-  *(volatile uint32_t*)GPIOD_MODER |= (1 << (12 * 2)) | (1 << (13 * 2)) |
-  	(1 << (13 * 2)) | (1 << (14 * 2)) | (1 << (15 * 2));
+    // Make sure clocks work..
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;
+    // set to outputs.
+    LED_PORT->MODER |= GPIO_MODER_MODER12_0 | GPIO_MODER_MODER13_0 |
+        GPIO_MODER_MODER14_0 | GPIO_MODER_MODER15_0;
 }
 
 #else
@@ -64,12 +61,12 @@ static inline void setup_leds(void)
 
 static inline void switch_leds_on(void)
 {
-  *(volatile uint32_t*)LED_PORT_ODR = LED_BLUE | LED_GREEN | LED_ORANGE | LED_RED;
+    LED_PORT->ODR = LED_BLUE | LED_GREEN | LED_ORANGE | LED_RED;
 }
 
 static inline void switch_leds_off(void)
 {
-  *(volatile uint32_t*)LED_PORT_ODR = 0;
+    LED_PORT->ODR = 0;
 }
 
 #define delay()						\
@@ -79,7 +76,6 @@ do {							\
     __asm__ __volatile__ ("nop\n\t":::"memory");	\
 } while (0)
 
-/* static void __attribute__((naked)) __attribute__((used)) main(void) */
 void main(void)
 {
   setup_leds();

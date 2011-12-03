@@ -1,0 +1,9 @@
+This example blinks the onboard LEDs, and is configured to boot from flash.
+It uses the basic CMSIS platform definitions from ST, but does not use the entire Standard Peripheral
+Driver library.
+
+Running from SRAM has not yet been implemented (properly?)
+
+Verified on Discovery 32VL
+Verified on Discovery 32L (Blink speed is pretty slow, L chips start up at 2Mhz)
+Not (currently) tested on 32F4
