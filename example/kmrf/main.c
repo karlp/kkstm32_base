@@ -13,6 +13,8 @@
 #include "stm32l1xx_flash.h"
 #include "stm32l1xx_syscfg.h"
 #include "stm32l1xx_dbgmcu.h"
+#include "stm32l1xx_usart.h"
+
 
 #define GPIO_HIGH(a,b) 		a->BSRRL = b
 #define GPIO_LOW(a,b)		a->BSRRH = b
@@ -20,8 +22,8 @@
 
 /* hardware configuration */
 
-# define GPIOB_MODER (GPIOB + 0x00) /* port mode register */
-# define GPIOB_ODR (GPIOB + 0x14) /* port output data register */
+#define GPIOB_MODER (GPIOB + 0x00) /* port mode register */
+#define GPIOB_ODR (GPIOB + 0x14) /* port output data register */
 
 // identical...
 //# define LED_BLUE (1 << 6) /* port B, pin 6 */
@@ -31,15 +33,16 @@
 
 static inline void switch_leds_on(void)
 {
-  GPIO_HIGH(GPIOB, LED_GREEN);	
-  GPIO_HIGH(GPIOB, LED_BLUE);
+    GPIO_HIGH(GPIOB, LED_GREEN);
+    GPIO_HIGH(GPIOB, LED_BLUE);
 }
 
 static inline void switch_leds_off(void)
 {
-  GPIO_LOW(GPIOB, LED_GREEN);	
-  GPIO_LOW(GPIOB, LED_BLUE);
+    GPIO_LOW(GPIOB, LED_GREEN);
+    GPIO_LOW(GPIOB, LED_BLUE);
 }
+
 /**
  * We want to use the ADC in this app, which needs the HSI, which runs at 16MHz,
  * by default the 32L starts up in voltage range 2, which only allows 8Mhz 
@@ -59,7 +62,7 @@ void SystemInit(void)
 
     /* HSI is 16mhz RC clock directly fed to SYSCLK (rm00038, figure 9) */
 
-//#define USE_RAW_CMSIS
+    //#define USE_RAW_CMSIS
 #ifdef USE_RAW_CMSIS
     // Do it all by hand with RCC->CR and so on...
 #else // use stm32 lib methods...
@@ -89,87 +92,136 @@ void SystemInit(void)
 
 volatile uint64_t ksystick;
 
-uint64_t millis(void) {
+uint64_t millis(void)
+{
     return ksystick;
 }
 
-void SysTick_Handler(void) {
+void SysTick_Handler(void)
+{
     ksystick++;
 }
 
+void setup_gpios(void)
+{
+    /* configure gpios */
+    static GPIO_InitTypeDef GPIO_InitStructure;
 
-int main(void) {
-  static GPIO_InitTypeDef GPIO_InitStructure;
-  static unsigned int led_state = 0;
-  
-  RCC_ClocksTypeDef clockinfo;
-  RCC_GetClocksFreq(&clockinfo);
-  // regardless of clock speed this gives us 1000 ticks per second
-  SysTick_Config(clockinfo.SYSCLK_Frequency / 1000);
-  
-  // So, what is our clock...?
-  int blink_speed_ms;
-  if (clockinfo.SYSCLK_Frequency > (9 * 1000 * 1000)) {
-      // probably running on something highspeed, like HSI
-      blink_speed_ms = 75;
-  } else {
-      blink_speed_ms = 1500;
-  }
-  
-  /* configure gpios */
+    /* Enable GPIOs clock */
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
 
-  /* Enable GPIOs clock */ 	
-  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
-  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
-  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
+    /* Configure the GPIO_LED pins  LD3 & LD4*/
+    GPIO_InitStructure.GPIO_Pin = LED_GREEN | LED_BLUE;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
+    GPIO_LOW(GPIOB, LED_GREEN);
+    GPIO_LOW(GPIOB, LED_BLUE);
 
-  /* Configure the GPIO_LED pins  LD3 & LD4*/
-  GPIO_InitStructure.GPIO_Pin = LED_GREEN | LED_BLUE;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
-  GPIO_LOW(GPIOB, LED_GREEN);
-  GPIO_LOW(GPIOB, LED_BLUE);
-  
-  
-  // setup my own green led... on PC3
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
-  GPIO_Init(GPIOC, &GPIO_InitStructure);
-  // setup my own red led... on PA4
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-  
-  // Setup an adc...
-  ADC_InitTypeDef adcinit;
-  
-/* Enable ADC clock */
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
-  //ADC_DeInit(ADC1);
-  // all defaults...
-  ADC_StructInit(&adcinit);
-  ADC_Init(ADC1, &adcinit);
 
-  //ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 1, ADC_SampleTime_192Cycles);
-  ADC_DelaySelectionConfig(ADC1, ADC_DelayLength_Freeze);
+    // setup my own green led... on PC3
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
+    GPIO_Init(GPIOC, &GPIO_InitStructure);
+    // setup my own red led... on PA4
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-  ADC_PowerDownCmd(ADC1, ADC_PowerDown_Idle_Delay, ENABLE);
-  
-  /* Enable ADC1 */
-  ADC_Cmd(ADC1, ENABLE);
-  
-  /* Wait until ADC1 ON status */
-  while (ADC_GetFlagStatus(ADC1, ADC_FLAG_ADONS) == RESET)
-    ;
+}
 
+void setup_adc(void)
+{
+    // Setup an adc...
+    ADC_InitTypeDef adcinit;
+
+    /* Enable ADC clock */
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+    //ADC_DeInit(ADC1);
+    // all defaults...
+    ADC_StructInit(&adcinit);
+    ADC_Init(ADC1, &adcinit);
+
+    //ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 1, ADC_SampleTime_192Cycles);
+    ADC_DelaySelectionConfig(ADC1, ADC_DelayLength_Freeze);
+
+    ADC_PowerDownCmd(ADC1, ADC_PowerDown_Idle_Delay, ENABLE);
+
+    /* Enable ADC1 */
+    ADC_Cmd(ADC1, ENABLE);
+
+    /* Wait until ADC1 ON status */
+    while (ADC_GetFlagStatus(ADC1, ADC_FLAG_ADONS) == RESET)
+        ;
+}
+
+int kkputc(int ch) {
+    USART_SendData(USART2, (uint8_t) ch);
+
+    /* Loop until transmit data register is empty */
+    while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET)
+        ;
+
+    return ch;
+}
+
+void setup_usart(void) {
+    // enable clocks for usart2
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+    
+    // Setup Alternate Functions to get usart2 out on PA2/PA3...
+    GPIO_InitTypeDef usart_af;
+    usart_af.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
+    usart_af.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_Init(GPIOA, &usart_af);
+    
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
+    
+    
+    USART_ClockInitTypeDef usart_clocks;
+    USART_ClockStructInit(&usart_clocks);
+    usart_clocks.USART_Clock = USART_Clock_Enable;
+    USART_ClockInit(USART2, &usart_clocks);
+    
+    USART_InitTypeDef usart_init;
+    usart_init.USART_BaudRate = 57600;
+    usart_init.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    usart_init.USART_StopBits = USART_StopBits_1;
+    usart_init.USART_Parity = USART_Parity_No;
+    usart_init.USART_WordLength = USART_WordLength_8b;
+    usart_init.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+    USART_Init(USART2, &usart_init);
+    USART_Cmd(USART2, ENABLE);
+    //USART_GetFlagStatus(USART2, USART_)
+}
+
+int main(void)
+{
+    static unsigned int led_state = 0;
+
+    RCC_ClocksTypeDef clockinfo;
+    RCC_GetClocksFreq(&clockinfo);
+    // regardless of clock speed this gives us 1000 ticks per second
+    SysTick_Config(clockinfo.SYSCLK_Frequency / 1000);
+    int blink_speed_ms = 75;
+
+    setup_gpios();
+    setup_adc();
+    setup_usart();
+
+    kkputc('S');
     uint64_t lasttime = millis();
     while (1) {
         if (millis() - blink_speed_ms > lasttime) {
             if (led_state & 1) {
                 switch_leds_on();
+                kkputc('D');
             } else {
                 switch_leds_off();
+                kkputc('d');
             }
             led_state ^= 1;
             GPIO_TOGGLE(GPIOC, GPIO_Pin_3);
