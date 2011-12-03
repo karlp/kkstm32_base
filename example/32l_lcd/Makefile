@@ -29,8 +29,10 @@ BOOT_FLASH?=1
 ifeq ($(BOOT_FLASH),1)
 	CFLAGS+=-Wl,-T,stm32l15xxb_flash.ld
 else
-	CFLAGS+=-Wl,-T,linker_stm32l.lds
+	CFLAGS+=-Wl,-T,stm32l15xxb_sram.ld
 	CFLAGS+=-DCONFIG_BOOT_SRAM=1
+	# This keeps the standard system_xxx files from doing any damage...
+	CFLAGS+=-DVECT_TAB_SRAM
 endif
 
 ## tricksy....
@@ -38,7 +40,7 @@ ifneq ($(USER),"")
 	CFLAGS+=-DSURPRISE_STRING=\"$(USER)\"
 endif
 
-LDFLAGS+=-L../ld_scripts
+LDFLAGS+=-L../ld_scripts -L.
 LDFLAGS+=-L$(LIBS_STM_PATH)/build -lstm32_stdperiph_l1xx
 
 SRCS=\

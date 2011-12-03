@@ -66,28 +66,6 @@ do {							\
 } while (0)
 
 
-#if CONFIG_BOOT_SRAM
-
-extern uint32_t _fstack;
-
-static inline void setup_stack(void)
-{
-  /* setup the stack to point to _fstack (refer to ld script) */
-
-  static const uint32_t fstack = (uint32_t)&_fstack;
-
-  __asm__ __volatile__
-    (
-     "ldr sp, %0\n\t"
-     : 
-     : "m"(fstack)
-     : "sp"
-    );
-}
-
-#endif /* CONFIG_BOOT_SRAM */
-
-
 /* application related setup */
 
 static void RCC_Configuration(void)
@@ -254,10 +232,6 @@ void Init_GPIOs(void)
 /* main */
 static void __attribute__((naked)) __attribute__((used)) real_main(void)
 {
-#if CONFIG_BOOT_SRAM
-  /* do not use previsouly setup stack, if any */
-  setup_stack();
-#endif /* CONFIG_BOOT_SRAM */
 
   RCC_Configuration();
 
@@ -275,7 +249,11 @@ static void __attribute__((naked)) __attribute__((used)) real_main(void)
 
     LCD_GLASS_Clear();
 #ifdef SURPRISE_STRING
+#ifdef CONFIG_BOOT_SRAM
+    LCD_GLASS_DisplayString(">>SRAM!!");
+#else
     LCD_GLASS_ScrollSentence("       hello " SURPRISE_STRING, 1, 500);
+#endif
 #else
     LCD_GLASS_DisplayString("ON    ");
     delay();

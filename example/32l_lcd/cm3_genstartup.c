@@ -85,7 +85,22 @@ void __attribute__((noreturn, naked)) Reset_Handler() {
     dest = &__bss_start;
     while(dest < &__bss_end)
         *(dest++) = 0;
+#if defined(CONFIG_BOOT_SRAM) && (CONFIG_BOOT_SRAM > 0)
+  static const unsigned int fstack = (unsigned int)&_estack;
+  __asm__ __volatile__
+    (
+     "ldr sp, %0\n\t"
+     : 
+     : "m"(fstack)
+     : "sp"
+    );
     
+  // Not really sure what this is, but the docs make it seem important...
+//        SCB->VTOR = SRAM_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM. */
+#define VTOR   0xE000ED08 
+#define SRAM_BASE (1<<29)
+    *(volatile unsigned int*)VTOR = SRAM_BASE;
+#endif
 	SystemInit();
 	main();
 }
