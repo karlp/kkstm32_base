@@ -164,7 +164,27 @@ int kkputc(int ch) {
     while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET)
         ;
 
+    if (ch == '\n') {
+        kkputc('\r');
+    }
     return ch;
+}
+
+int kkwrite(int file, char *ptr, int len)
+{
+    int todo;
+
+    for (todo = 0; todo < len; todo++) {
+        kkputc(*ptr++);
+    }
+    return len;
+}
+
+int kkputs(char *str) {
+    char c;
+    while ((c = *str++) != '\0')
+           kkputc(c);
+    return 0;
 }
 
 void setup_usart(void) {
@@ -206,22 +226,22 @@ int main(void)
     RCC_GetClocksFreq(&clockinfo);
     // regardless of clock speed this gives us 1000 ticks per second
     SysTick_Config(clockinfo.SYSCLK_Frequency / 1000);
-    int blink_speed_ms = 75;
+    int blink_speed_ms = 400;
 
     setup_gpios();
     setup_adc();
     setup_usart();
 
-    kkputc('S');
+    kkputs("hello karl...\n");
     uint64_t lasttime = millis();
     while (1) {
         if (millis() - blink_speed_ms > lasttime) {
             if (led_state & 1) {
                 switch_leds_on();
-                kkputc('D');
+                kkputs("leds go on..\n");
             } else {
                 switch_leds_off();
-                kkputc('d');
+                kkputs("leds go off!\n");
             }
             led_state ^= 1;
             GPIO_TOGGLE(GPIOC, GPIO_Pin_3);
