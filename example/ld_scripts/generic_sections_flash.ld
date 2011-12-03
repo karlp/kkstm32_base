@@ -54,3 +54,5 @@ SECTIONS
 }
 
 _end = .;
+
+PROVIDE(_estack = ORIGIN(RAM) + LENGTH(RAM) - 4);

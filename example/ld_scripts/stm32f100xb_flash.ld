@@ -11,6 +11,4 @@ MEMORY
     RAM (rxw)     : ORIGIN = 0x20000000, LENGTH = 8K
 }
 
-PROVIDE(_estack = ORIGIN(RAM) + LENGTH(RAM) - 4);
-
 INCLUDE generic_sections_flash.ld
