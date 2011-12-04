@@ -2,7 +2,8 @@ SECTIONS
 {
 	.text(ORIGIN(RAM)):
 	{
-        *(.vectors)    /* Vector table */
+        *(.vectors)   /* Vector table */
+        *(.vectors.*) /* Any extra device vectors */
         *(.text)      /* Program code */
         *(.rodata)    /* Read only data */
         *(.rodata*)

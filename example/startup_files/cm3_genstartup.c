@@ -41,10 +41,12 @@ void SVC_Handler(void) __attribute__ ((weak, alias ("Dummy_Handler")));
 void DebugMon_Handler(void) __attribute__ ((weak, alias ("Dummy_Handler")));
 void PendSV_Handler(void) __attribute__ ((weak, alias ("Dummy_Handler")));
 void SysTick_Handler(void) __attribute__ ((weak, alias ("Dummy_Handler")));
-// Define the rest based on Chip type, ST, NXP, etc
-// TODO - put in all the rest here, hopefully somehow magically so that the rest 
-// of this file can be shared...
 
+/**
+ * The chip specific (STM32L1xx or F1, or LPC, or TI etc) vectors are in a 
+ * chip specific file.  by placing them in a subsection, they can be linked in
+ * immediately after the core cortex handler table.
+ */
 
 void Dummy_Handler(void) {
     while(1) {
@@ -105,10 +107,10 @@ void __attribute__((noreturn, naked)) Reset_Handler() {
 	main();
 }
 
-
-// TODO - ideally, put these cm3 vectors in one section, 
-// and allow other chip type vectors to go in a different section, that the 
-// linker would append together....
+/**
+ * This table contains the core Coretex vectors, and should be linked first.
+ * You should link any chip specific tables after this.
+ */
 void *vector_table[] __attribute__ ((section(".vectors"))) = {
 	&_estack,
 	Reset_Handler,

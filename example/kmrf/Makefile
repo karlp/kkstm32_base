@@ -45,7 +45,7 @@ all: $(BIN_IMAGE)
 $(BIN_IMAGE): $(EXECUTABLE)
 	$(OBJCOPY) -O binary $^ $@
 
-$(EXECUTABLE): main.c ../startup_files/cm3_genstartup.c
+$(EXECUTABLE): main.c ../startup_files/cm3_genstartup.c ../startup_files/stm32l1xx_vectors.c
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 clean:

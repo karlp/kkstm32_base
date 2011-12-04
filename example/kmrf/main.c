@@ -2,6 +2,7 @@
 #include "stdint.h"
 
 /* libstm32l_discovery headers */
+#include "misc.h"
 #include "stm32l1xx_gpio.h"
 #include "stm32l1xx_adc.h"
 #include "stm32l1xx_dac.h"
@@ -215,7 +216,38 @@ void setup_usart(void) {
     usart_init.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
     USART_Init(USART2, &usart_init);
     USART_Cmd(USART2, ENABLE);
-    //USART_GetFlagStatus(USART2, USART_)
+}
+
+volatile int button_pressed;
+
+void EXTI0_IRQHandler(void) {
+    button_pressed++;
+    // clear flag...
+    EXTI_ClearITPendingBit(EXTI_Line0);
+}
+
+void setup_button_irqs(void)
+{
+    GPIO_InitTypeDef button;
+    button.GPIO_Mode = GPIO_Mode_IN;
+    button.GPIO_Pin = GPIO_Pin_0;
+    GPIO_Init(GPIOA, &button);
+
+    EXTI_InitTypeDef exti;
+    exti.EXTI_Line = EXTI_Line0;
+    exti.EXTI_Mode = EXTI_Mode_Interrupt;
+    exti.EXTI_Trigger = EXTI_Trigger_Rising;
+    exti.EXTI_LineCmd = ENABLE;
+    EXTI_Init(&exti);
+
+    NVIC_InitTypeDef nvic;
+    nvic.NVIC_IRQChannel = EXTI0_IRQn;
+    // These are actually against each other, can't have 4 bits for both of them...
+    nvic.NVIC_IRQChannelPreemptionPriority = 0xf; // lowest priority...
+    nvic.NVIC_IRQChannelSubPriority = 0xf;
+    nvic.NVIC_IRQChannelCmd = ENABLE;
+
+    NVIC_Init(&nvic);
 }
 
 int main(void)
@@ -231,6 +263,7 @@ int main(void)
     setup_gpios();
     setup_adc();
     setup_usart();
+    setup_button_irqs();
 
     kkputs("hello karl...\n");
     uint64_t lasttime = millis();
@@ -238,14 +271,23 @@ int main(void)
         if (millis() - blink_speed_ms > lasttime) {
             if (led_state & 1) {
                 switch_leds_on();
-                kkputs("leds go on..\n");
+                kkputs("O");
             } else {
                 switch_leds_off();
-                kkputs("leds go off!\n");
+                kkputs("o");
             }
             led_state ^= 1;
             GPIO_TOGGLE(GPIOC, GPIO_Pin_3);
             lasttime = millis();
+        }
+
+        if (button_pressed) {
+            button_pressed = 0;
+            kkputs("button was pressed!\n");
+            blink_speed_ms >>= 1;
+            if (blink_speed_ms <= 50) {
+                blink_speed_ms = 1000;
+            }
         }
 
         // start and wait for adc to convert...
