@@ -17,7 +17,8 @@ CFLAGS+=-I.
 
 
 PLATFORM=stm32l1xx
-LIBS_STM_PATH=../libs_stm
+STM32_BASE=../..
+LIBS_STM_PATH=$(STM32_BASE)/libs_stm
 
 CFLAGS+=-I$(LIBS_STM_PATH)/inc/base
 CFLAGS+=-I$(LIBS_STM_PATH)/inc/core_support
@@ -40,14 +41,14 @@ ifneq ($(USER),"")
 	CFLAGS+=-DSURPRISE_STRING=\"$(USER)\"
 endif
 
-LDFLAGS+=-L../startup_files -L.
+LDFLAGS+=-L$(STM32_BASE)/ld_scripts -L.
 LDFLAGS+=-L$(LIBS_STM_PATH)/build -lstm32_stdperiph_l1xx
 
 SRCS=\
 main.c\
 stm32l_discovery_lcd.c\
 system_stm32l1xx.c\
-../startup_files/cm3_genstartup.c
+$(STM32_BASE)/startup/cm3_genstartup.c
 
 all: $(BIN_IMAGE)
 

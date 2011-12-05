@@ -18,7 +18,8 @@ CFLAGS+=-Wl,-Ttext,0x20000000 -Wl,-e,0x20000000
 
 PLATFORM=stm32f10x
 BOARD_SUPPORT=../board_support/discovery_32vl
-LIBS_STM_PATH=../libs_stm
+STM32_BASE=../..
+LIBS_STM_PATH=$(STM32_BASE)/libs_stm
 
 CFLAGS+=-I.
 CFLAGS+=-I$(LIBS_STM_PATH)/inc/base

@@ -1,11 +1,12 @@
 CC=arm-none-eabi-gcc
 OBJCOPY=arm-none-eabi-objcopy
 
+STM32_BASE=../..
 DEF_CFLAGS=-g -O2 -mlittle-endian -mthumb -ffreestanding -nostdlib -nostdinc
-DEF_CFLAGS+=-I../libs_stm/inc/base
-DEF_CFLAGS+=-I../libs_stm/inc/core_support
-DEF_CFLAGS+=-I../libs_stm/inc/device_support
-DEF_CFLAGS+=-L../startup_files
+DEF_CFLAGS+=-I$(STM32_BASE)/libs_stm/inc/base
+DEF_CFLAGS+=-I$(STM32_BASE)/libs_stm/inc/core_support
+DEF_CFLAGS+=-I$(STM32_BASE)/libs_stm/inc/device_support
+DEF_CFLAGS+=-L$(STM32_BASE)/ld_scripts
 
 # to run from SRAM
 # make BOOT_FLASH=0
@@ -28,7 +29,7 @@ all: blink_32VL.bin blink_32L.bin blink_F4.bin
 
 %.bin: %.elf
 	$(OBJCOPY) -O binary $^ $@
-SRCS=main.c ../startup_files/cm3_genstartup.c
+SRCS=main.c $(STM32_BASE)/startup/cm3_genstartup.c
 
 blink_32VL.elf: $(SRCS)
 	$(CC) $(CFLAGS_VL) -Wl,-T,stm32f100xb_$(LINK_TYPE).ld $^ -o $@

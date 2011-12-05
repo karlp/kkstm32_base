@@ -15,7 +15,7 @@ CFLAGS+=-Wl,-T,stm32_flash.ld
 
 PLATFORM=stm32f4xx
 BOARD_SUPPORT=../board_support/discovery_32f4
-LIBS_STM_PATH=../libs_stm
+LIBS_STM_PATH=../../libs_stm
 
 CFLAGS+=-I.
 CFLAGS+=-I$(LIBS_STM_PATH)/inc/base
