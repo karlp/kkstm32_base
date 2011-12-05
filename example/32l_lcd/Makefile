@@ -18,6 +18,7 @@ CFLAGS+=-I.
 
 PLATFORM=stm32l1xx
 STM32_BASE=../..
+STLINK_HOME=/home/karlp/src/stlink
 LIBS_STM_PATH=$(STM32_BASE)/libs_stm
 
 CFLAGS+=-I$(LIBS_STM_PATH)/inc/base
@@ -63,6 +64,6 @@ clean:
 	-rm -f $(ELF)
 
 write: all
-	../../flash/flash write $(BIN_IMAGE) 0x08000000
+	$(STLINK_HOME)/flash/flash write $(BIN_IMAGE) 0x08000000
 
 .PHONY: all clean

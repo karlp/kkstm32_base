@@ -14,7 +14,14 @@
 /**
  * This should be defined in your other startup files...
  */
-extern void Dummy_Handler(void);
+// Something's not quite right.. I was sure this was working before,
+// and properly using the Dummy_Handler() defined in cm3_genstartup.c
+//extern void Dummy_Handler(void);
+void Dummy_Handler(void) __attribute__ ((weak));
+void Dummy_Handler(void) {
+    while(1)
+        ;
+}
 
 void WWDG_IRQHandler(void) __attribute__((weak, alias("Dummy_Handler")));
 void PVD_IRQHandler(void) __attribute__((weak, alias("Dummy_Handler")));

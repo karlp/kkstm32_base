@@ -9,6 +9,10 @@ CC=arm-none-eabi-gcc
 OBJCOPY=arm-none-eabi-objcopy
 
 DEBUG?=1
+STM32_BASE=../..
+STLINK_HOME=/home/karlp/src/stlink
+
+
 CFLAGS=-Os -mlittle-endian -mthumb
 CFLAGS+=-mcpu=cortex-m3
 CFLAGS+=-ffreestanding -nostdlib -nostdinc
@@ -28,7 +32,7 @@ else
 endif
 
 PLATFORM=stm32l1xx
-LIBS_STM_PATH=../libs_stm
+LIBS_STM_PATH=$(STM32_BASE)/libs_stm
 
 # stm32l_discovery lib
 CFLAGS+=-I$(LIBS_STM_PATH)/inc/base
@@ -37,7 +41,7 @@ CFLAGS+=-I$(LIBS_STM_PATH)/inc/device_support
 CFLAGS+=-I$(LIBS_STM_PATH)/inc/$(PLATFORM)
 
 LDFLAGS+=-L$(LIBS_STM_PATH)/build -lstm32_stdperiph_l1xx
-LDFLAGS+=-L../startup_files -lstm32_stdperiph_l1xx
+LDFLAGS+=-L$(STM32_BASE)/ld_scripts
 LDFLAGS+=-Wl,-Map=$(TARGET).map
 
 all: $(BIN_IMAGE)
@@ -45,7 +49,7 @@ all: $(BIN_IMAGE)
 $(BIN_IMAGE): $(EXECUTABLE)
 	$(OBJCOPY) -O binary $^ $@
 
-$(EXECUTABLE): main.c ../startup_files/cm3_genstartup.c ../startup_files/stm32l1xx_vectors.c
+$(EXECUTABLE): main.c $(STM32_BASE)/startup/cm3_genstartup.c $(STM32_BASE)/startup/stm32l1xx_vectors.c
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 clean:
@@ -53,6 +57,6 @@ clean:
 	rm -rf $(BIN_IMAGE)
 
 write: all
-	../../flash/flash write $(BIN_IMAGE) 0x08000000
+	$(STLINK_HOME)/flash/flash write $(BIN_IMAGE) 0x08000000
 
 .PHONY: all clean write
