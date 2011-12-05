@@ -1,8 +1,11 @@
 Working good examples
 * 32l_dac
 * 32l_lcd
-* ???
+* blink
 
+I haven't personally tested any of these on the F4 yet.
+
+the F4 directories need a lot of cleanup too...
 
 Don't trust many of these examples yet... A lot of them are a work in
 progress...

@@ -1,0 +1,10 @@
+
+* function sections and gc sections.
+  This should save a lot of memory, but it doesn't seem to quite work right.
+  Either the linker scripts aren't included enough of the right sections, or...
+
+* Get more of the original factory demos buildable and verified
+
+* Get libraries like STM32 Touch, and the USB libraries working and verified
+
+* 
