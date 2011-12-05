@@ -1,0 +1,12 @@
+This directory contains the StdPeriph libraries from ST, and the CMSIS core and device
+support, all from ST.
+
+The files have been put in different locations, and the Makefiles were written from scratch, but
+all of the _code_ was provided as is by ST
+
+Issues:
+* No tracking of which version of which library (yet)
+* All of these define assert_param() as empty.  That may not be what you
+  want!
+
+
