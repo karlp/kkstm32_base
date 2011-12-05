@@ -1,0 +1,10 @@
+This configures quite a few things.
+
+* ADC input on PA5.  When this is > 0x700 (half way) a user LED on PA4 turns on.
+* USART2 configured for 57600, 8N1, with tx/rx on PA2/PA3
+  Some minor trace is logged there...
+* user button one (on the 32L discovery board) is an external interrupt, which
+  changes the blink rate of the onboard LEDs
+
+In addition, this shows the use of overriding  SystemInit() to set up clocks
+differently.  (The STM32L starts up in 2Mhz MSI mode, not 16MHz HSI mode)

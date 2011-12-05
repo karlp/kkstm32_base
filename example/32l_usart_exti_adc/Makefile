@@ -1,4 +1,4 @@
-TARGET=kmrf
+TARGET=32l_usart_exti_adc
 # all below here should not need to be touched...(much)
 
 
