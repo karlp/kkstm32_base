@@ -1,0 +1,10 @@
+This configures USART2 for 57600, 8N1, tx/rx on PA2/PA3.
+It is used for debug output.
+
+SPI2 on PB12..PB15 is used for a SPI interface to a microchip MRF24J40 module,
+for 802.15.4 communications.
+
+PB10 is used for the MRF24J40 reset pin, and PB2 for the IRQ
+
+In addition, this shows the use of overriding  SystemInit() to set up clocks
+differently.  (The STM32L starts up in 2Mhz MSI mode, not 16MHz HSI mode)
