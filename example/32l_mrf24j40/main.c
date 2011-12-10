@@ -235,7 +235,7 @@ void setup_spi(void) {
   spi.SPI_DataSize = SPI_DataSize_8b;
   spi.SPI_NSS = SPI_NSS_Soft;
   // Fpclk / 16, should be safe enough, mrf says it goes to 20Mhz
-  spi.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;
+  spi.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256;
   // These seem to be correct with MRF manual
   spi.SPI_CPOL = SPI_CPOL_Low;
   spi.SPI_CPHA = SPI_CPHA_1Edge;
@@ -319,6 +319,14 @@ void handle_tx(mrf_tx_info_t *txinfo) {
     }
 }
 
+void kspi_tx(char c) {
+    mrf_select();
+    delay_ms(1);
+    spi_tx(c);
+    delay_ms(1);
+    mrf_deselect();
+}
+
 int main(void)
 {
     static unsigned int led_state = 0;
@@ -330,7 +338,7 @@ int main(void)
     setup_adc();
     setup_usart();
     kkputs("hello karl...\n");
-    //setup_spi();
+    setup_spi();
 //    setup_mrf_irqs();
 
     uint64_t lasttime = millis();
@@ -340,13 +348,14 @@ int main(void)
     mrf_deselect();
 
     kkputs("ok, time for init...\n");
+    kspi_tx(0xaa);
 //    mrf_init();
     // set the pan id to use
 //    mrf_pan_write(0xcafe);
     // set our address
 //    mrf_address16_write(0x3232);
     kkputs("setup mrf address");
-    
+
     while (1) {
         // Call this pretty often, at least as often as you expect to be receiving packets
 //        mrf_check_flags(&handle_rx, &handle_tx);
@@ -354,9 +363,11 @@ int main(void)
             if (led_state & 1) {
                 switch_leds_on();
                 kkputc('O');
+                kspi_tx(0xbb);
             } else {
                 switch_leds_off();
                 kkputc('o');
+                kspi_tx(0x33);
             }
             led_state ^= 1;
             lasttime = millis();
