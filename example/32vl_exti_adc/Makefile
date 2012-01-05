@@ -2,6 +2,7 @@ TARGET=32vl_exti_adc
 PLATFORM=stm32f10x
 LINKER_BASENAME=stm32f100xb
 # TODO - unify stmlib and platform....
+VECTORS=stm32f100x
 STMLIB=stm32_stdperiph_f10x
 # all below here should not need to be touched...(much)
 
@@ -52,7 +53,7 @@ all: $(BIN_IMAGE)
 $(BIN_IMAGE): $(EXECUTABLE)
 	$(OBJCOPY) -O binary $^ $@
 
-$(EXECUTABLE): main.c $(STM32_BASE)/startup/cm3_genstartup.c $(STM32_BASE)/startup/$(PLATFORM)_vectors.c
+$(EXECUTABLE): main.c $(STM32_BASE)/startup/cm3_genstartup.c $(STM32_BASE)/startup/$(VECTORS)_vectors.c
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 clean:

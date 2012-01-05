@@ -145,9 +145,11 @@ void EXTI0_IRQHandler(void) {
 
 void setup_button_irqs(void)
 {
-#if readytouse
+    // AFIO is used for EXTI stuff..
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
+
     GPIO_InitTypeDef button;
-    button.GPIO_Mode = GPIO_Mode_IN;
+    button.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     button.GPIO_Pin = GPIO_Pin_0;
     GPIO_Init(GPIOA, &button);
 
@@ -166,7 +168,6 @@ void setup_button_irqs(void)
     nvic.NVIC_IRQChannelCmd = ENABLE;
 
     NVIC_Init(&nvic);
-#endif
 }
 
 int main(void)
