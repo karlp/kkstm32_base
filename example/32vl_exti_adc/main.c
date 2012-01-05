@@ -112,26 +112,20 @@ void setup_adc(void)
     // Setup an adc...
     ADC_InitTypeDef adcinit;
 
+    static GPIO_InitTypeDef GPIO_InitStructure;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
     /* Enable ADC clock */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+    RCC_ADCCLKConfig (RCC_PCLK2_Div6);
     //ADC_DeInit(ADC1);
     // all defaults...
     ADC_StructInit(&adcinit);
     ADC_Init(ADC1, &adcinit);
-
-#if readytouse
-    //ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 1, ADC_SampleTime_192Cycles);
-    ADC_DelaySelectionConfig(ADC1, ADC_DelayLength_Freeze);
-
-    ADC_PowerDownCmd(ADC1, ADC_PowerDown_Idle_Delay, ENABLE);
-
     /* Enable ADC1 */
     ADC_Cmd(ADC1, ENABLE);
-
-    /* Wait until ADC1 ON status */
-    while (ADC_GetFlagStatus(ADC1, ADC_FLAG_ADONS) == RESET)
-        ;
-#endif
 }
 
 
@@ -205,10 +199,10 @@ int main(void)
         }
 
         // start and wait for adc to convert...
-#if readytouse
-        ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 1, ADC_SampleTime_192Cycles);
-        ADC_SoftwareStartConv(ADC1);
-        while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0)
+        ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 1, ADC_SampleTime_239Cycles5);
+        ADC_Cmd(ADC1, ENABLE);
+        ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+        while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET)
             ;
 
         uint16_t pot_val = ADC_GetConversionValue(ADC1);
@@ -217,6 +211,5 @@ int main(void)
         } else {
             GPIO_LOW(GPIOA, GPIO_Pin_4);
         }
-#endif
     }
 }

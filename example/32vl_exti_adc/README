@@ -1,6 +1,6 @@
 This configures quite a few things.
 
-# Not yet... * ADC input on PA5.  When this is > 0x700 (half way) a user LED on PA4 turns on.
+* ADC input on PA5.  When this is > 0x700 (half way) a user LED on PA4 turns on.
 * user button one (on the 32VL discovery board) is an external interrupt, which
   changes the blink rate of the onboard LEDs
 
