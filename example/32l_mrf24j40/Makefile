@@ -7,6 +7,7 @@ BIN_IMAGE=$(TARGET).bin
 
 CC=arm-none-eabi-gcc
 OBJCOPY=arm-none-eabi-objcopy
+SIZE=arm-none-eabi-size
 
 DEBUG?=1
 STM32_BASE=../..
@@ -45,6 +46,7 @@ LDFLAGS+=-L$(STM32_BASE)/ld_scripts
 LDFLAGS+=-Wl,-Map=$(TARGET).map
 
 all: $(BIN_IMAGE)
+	$(SIZE) $(EXECUTABLE)
 
 $(BIN_IMAGE): $(EXECUTABLE)
 	$(OBJCOPY) -O binary $^ $@
