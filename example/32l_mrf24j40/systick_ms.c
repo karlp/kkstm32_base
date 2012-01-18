@@ -7,13 +7,13 @@
 
 #include "stm32l1xx_rcc.h"
 
-static volatile uint64_t ksystick;
+static volatile int64_t ksystick;
 
 /**
  * Keep track of a current milliseconds since boot ticker
  * @return 
  */
-uint64_t millis(void)
+int64_t millis(void)
 {
     return ksystick;
 }
@@ -23,13 +23,14 @@ uint64_t millis(void)
  * @param ms
  */
 void delay_ms(int ms) {
-    uint64_t now = millis();
+    int64_t now = millis();
     while (millis() - ms < now) {
         ;
     }
 }
 
 void systick_ms_init(void) {
+    ksystick = 0;
     RCC_ClocksTypeDef clockinfo;
     RCC_GetClocksFreq(&clockinfo);
     // regardless of clock speed this gives us 1000 ticks per second

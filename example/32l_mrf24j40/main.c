@@ -8,6 +8,7 @@
 #include "stm32l1xx_spi.h"
 #include "stm32l1xx_exti.h"
 #include "stm32l1xx_usart.h"
+#include "stm32l1xx_syscfg.h"
 
 #include "32l_mrf24j40_conf.h"
 #include "systick_ms.h"
@@ -341,19 +342,19 @@ int main(void)
     setup_spi();
 //    setup_mrf_irqs();
 
-    uint64_t lasttime = millis();
-    kkputs("ok karl, about to write the pan...\n");
-
+    int64_t lasttime = millis();
     mrf_reset();
     mrf_deselect();
 
-    kkputs("ok, time for init...\n");
-    kspi_tx(0xaa);
 //    mrf_init();
     // set the pan id to use
-//    mrf_pan_write(0xcafe);
+    mrf_pan_write(0xcafe);
     // set our address
-//    mrf_address16_write(0x3232);
+    
+    uint16_t panid = mrf_pan_read();
+    kkputs("reading back pan as: ");
+    phex16(panid);
+    mrf_address16_write(0x3232);
     kkputs("setup mrf address");
 
     while (1) {
@@ -363,11 +364,9 @@ int main(void)
             if (led_state & 1) {
                 switch_leds_on();
                 kkputc('O');
-                kspi_tx(0xbb);
             } else {
                 switch_leds_off();
                 kkputc('o');
-                kspi_tx(0x33);
             }
             led_state ^= 1;
             lasttime = millis();

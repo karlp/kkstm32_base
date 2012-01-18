@@ -20,10 +20,13 @@
  */
 void mrf_select(void) {
     GPIO_LOW(PORT_MRF_CHIPSELECT, PIN_MRF_CHIPSELECT);
+    delay_ms(1);
 }
 
 void mrf_deselect(void) {
+    delay_ms(1);
     GPIO_HIGH(PORT_MRF_CHIPSELECT, PIN_MRF_CHIPSELECT);
+    delay_ms(1);
 }
 
     
