@@ -12,6 +12,8 @@
 
 #include "32l_mrf24j40_conf.h"
 #include "systick_ms.h"
+
+#include "karlnet.h"
 #include "lib_mrf24j.h"
 
 
@@ -98,6 +100,10 @@ void setup_gpios(void)
     GPIO_Init(PORT_MRF_CHIPSELECT, &GPIO_InitStructure);
     GPIO_HIGH(PORT_MRF_CHIPSELECT, PIN_MRF_CHIPSELECT);
     
+    // setup reset pin, PB10
+    GPIO_InitStructure.GPIO_Pin = PIN_MRF_CHIPSELECT;
+    GPIO_Init(PORT_MRF_RESET, &GPIO_InitStructure);
+    GPIO_LOW(PORT_MRF_RESET, PIN_MRF_RESET);
 }
 
 /**
@@ -140,16 +146,6 @@ int kkputc(int ch) {
     return ch;
 }
 
-int kkwrite(int file, char *ptr, int len)
-{
-    int todo;
-
-    for (todo = 0; todo < len; todo++) {
-        kkputc(*ptr++);
-    }
-    return len;
-}
-
 void phex1(unsigned char c)
 {
         kkputc(c + ((c < 10) ? '0' : 'A' - 10));
@@ -165,6 +161,11 @@ void phex16(unsigned int i)
 {
         phex(i >> 8);
         phex(i);
+}
+
+void phex32(unsigned int i) {
+    phex(i >> 16);
+    phex(i & 0xffff);
 }
      
 
@@ -205,8 +206,6 @@ void setup_usart(void) {
     USART_Cmd(USART2, ENABLE);
 }
 
-// we're using spi2
-#define SPIPORT GPIOB
 void setup_spi(void) {
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
 
@@ -214,9 +213,9 @@ void setup_spi(void) {
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
   
   // GPIO_PinAFConfig(SPIPORT, GPIO_PinSource12, GPIO_AF_SPI2);  // nss
-  GPIO_PinAFConfig(SPIPORT, GPIO_PinSource13, GPIO_AF_SPI2);
-  GPIO_PinAFConfig(SPIPORT, GPIO_PinSource14, GPIO_AF_SPI2);
-  GPIO_PinAFConfig(SPIPORT, GPIO_PinSource15, GPIO_AF_SPI2);
+  GPIO_PinAFConfig(PORT_SPI, GPIO_PinSource13, GPIO_AF_SPI2);
+  GPIO_PinAFConfig(PORT_SPI, GPIO_PinSource14, GPIO_AF_SPI2);
+  GPIO_PinAFConfig(PORT_SPI, GPIO_PinSource15, GPIO_AF_SPI2);
 
   GPIO_InitTypeDef gpio;
   gpio.GPIO_Mode = GPIO_Mode_AF;
@@ -227,7 +226,7 @@ void setup_spi(void) {
   /* basic config for all pins.. */
   //gpio.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
   gpio.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
-  GPIO_Init(SPIPORT, &gpio);
+  GPIO_Init(PORT_SPI, &gpio);
   
   /* SPI configuration -------------------------------------------------------*/
   SPI_InitTypeDef spi;
@@ -265,21 +264,24 @@ uint8_t spi_tx(uint8_t cData) {
 }
 
 
-/*
 void EXTI2_IRQHandler(void) {
     // clear flag...
     EXTI_ClearITPendingBit(EXTI_Line2);
+    EXTI_ClearFlag(EXTI_Line2);
     kkputs("[I]");
     mrf_interrupt_handler();
 }
-*/
 
 void setup_mrf_irqs(void)
 {
     GPIO_InitTypeDef mrf_irq;
     mrf_irq.GPIO_Mode = GPIO_Mode_IN;
+    mrf_irq.GPIO_PuPd = GPIO_PuPd_NOPULL;
     mrf_irq.GPIO_Pin = GPIO_Pin_2;
     GPIO_Init(GPIOB, &mrf_irq);
+
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource2);
 
     EXTI_InitTypeDef exti;
     exti.EXTI_Line = EXTI_Line2;
@@ -320,69 +322,51 @@ void handle_tx(mrf_tx_info_t *txinfo) {
     }
 }
 
-void kspi_tx(char c) {
-    mrf_select();
-    delay_ms(1);
-    spi_tx(c);
-    delay_ms(1);
-    mrf_deselect();
-}
-
 int main(void)
 {
-    static unsigned int led_state = 0;
-
     systick_ms_init();
-    int blink_speed_ms = 400;
 
     setup_gpios();
     setup_adc();
     setup_usart();
     kkputs("hello karl...\n");
     setup_spi();
-//    setup_mrf_irqs();
+    setup_mrf_irqs();
 
-    int64_t lasttime = millis();
+    int64_t lasttime_msg = millis();
     mrf_reset();
     mrf_deselect();
 
-//    mrf_init();
+    mrf_init();
     // set the pan id to use
     mrf_pan_write(0xcafe);
     // set our address
-    
-    uint16_t panid = mrf_pan_read();
-    kkputs("reading back pan as: ");
-    phex16(panid);
     mrf_address16_write(0x3232);
     kkputs("setup mrf address");
+    
+    kpacket2 packet;
+    packet.header = 'x';
+    packet.versionCount = VERSION_COUNT(KPP_VERSION_2, 1);
 
     while (1) {
-        // Call this pretty often, at least as often as you expect to be receiving packets
-//        mrf_check_flags(&handle_rx, &handle_tx);
-        if (millis() - blink_speed_ms > lasttime) {
-            if (led_state & 1) {
-                switch_leds_on();
-                kkputc('O');
-            } else {
-                switch_leds_off();
-                kkputc('o');
-            }
-            led_state ^= 1;
-            lasttime = millis();
-        }
-
         // start and wait for adc to convert...
         ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 1, ADC_SampleTime_192Cycles);
         ADC_SoftwareStartConv(ADC1);
         while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0)
             ;
-
         uint16_t pot_val = ADC_GetConversionValue(ADC1);
-        if (pot_val > 0x700) {
-//            GPIO_HIGH(GPIOA, GPIO_Pin_4);
-        } else {
-//            GPIO_LOW(GPIOA, GPIO_Pin_4);
+        
+        // Call this pretty often, at least as often as you expect to be receiving packets
+        mrf_check_flags(&handle_rx, &handle_tx);
+        if (millis() - 2000 > lasttime_msg) {
+            GPIO_TOGGLE(GPIOB, LED_GREEN);
+            ksensor s1 = {KPS_SENSOR_TEST, pot_val};
+            packet.ksensors[0] = s1;
+            kkputs("\ntxing...:");phex16(pot_val);kkputc('\n');
+            kkputs("sizeof kpacket2 = ");phex16(sizeof(kpacket2));
+            mrf_send16(1, sizeof(kpacket2), (char*)&packet);
+            lasttime_msg = millis();
         }
+
     }
 }

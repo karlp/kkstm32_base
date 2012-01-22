@@ -22,11 +22,14 @@ extern "C" {
 //# define LED_GREEN (1 << 7) /* port B, pin 7 */
 #define LED_BLUE GPIO_Pin_6  // port doesn't matter...
 #define LED_GREEN GPIO_Pin_7
+#define PORT_MRF_RESET GPIOB  // PB10
 #define PIN_MRF_RESET GPIO_Pin_10  // PB10
 
 #define PORT_MRF_CHIPSELECT GPIOA
 #define PIN_MRF_CHIPSELECT GPIO_Pin_4  // PA4
 
+// we're using spi2
+#define PORT_SPI GPIOB
 
 
 
