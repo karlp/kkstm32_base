@@ -42,10 +42,12 @@ SECTIONS
     .bss :
     {
         PROVIDE(__bss_start = .);
+        PROVIDE(__bss_start__ = .);
         *(.bss)
         *(COMMON)
         . = ALIGN(4);
         PROVIDE(__bss_end = .);
+        PROVIDE(__bss_end__ = .);
     } >RAM
 
     . = ALIGN(4);
