@@ -263,6 +263,12 @@ uint8_t spi_tx(uint8_t cData) {
     return SPI2->DR;
 }
 
+void mrf_reset(void) {
+    GPIO_LOW(PORT_MRF_RESET, PIN_MRF_RESET);
+    delay_ms(10);  // gut feeling
+    GPIO_HIGH(PORT_MRF_RESET, PIN_MRF_RESET);
+    delay_ms(20);  // from manual
+}
 
 void EXTI2_IRQHandler(void) {
     // clear flag...

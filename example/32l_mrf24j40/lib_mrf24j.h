@@ -19,8 +19,6 @@ extern "C" {
     extern void mrf_select(void);  // Chip select, if necessary
     extern void mrf_deselect(void);  // chip deselect, if necessary
     extern uint8_t spi_tx(uint8_t cData);
-    
-    extern void mrf_reset(void);  // toggle gpio for reset pin
     extern void _delay_ms(int);  // only used at init time.
     // end of requirements...
 
