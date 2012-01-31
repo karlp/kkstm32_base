@@ -235,7 +235,7 @@ void setup_spi(void) {
   spi.SPI_DataSize = SPI_DataSize_8b;
   spi.SPI_NSS = SPI_NSS_Soft;
   // Fpclk / 16, should be safe enough, mrf says it goes to 20Mhz
-  spi.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256;
+  spi.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_64;
   // These seem to be correct with MRF manual
   spi.SPI_CPOL = SPI_CPOL_Low;
   spi.SPI_CPHA = SPI_CPHA_1Edge;
@@ -278,15 +278,15 @@ void setup_mrf_irqs(void)
     mrf_irq.GPIO_Mode = GPIO_Mode_IN;
     mrf_irq.GPIO_PuPd = GPIO_PuPd_NOPULL;
     mrf_irq.GPIO_Pin = GPIO_Pin_2;
-    GPIO_Init(GPIOB, &mrf_irq);
+    GPIO_Init(GPIOC, &mrf_irq);
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource2);
+    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOC, EXTI_PinSource2);
 
     EXTI_InitTypeDef exti;
     exti.EXTI_Line = EXTI_Line2;
     exti.EXTI_Mode = EXTI_Mode_Interrupt;
-    exti.EXTI_Trigger = EXTI_Trigger_Rising;
+    exti.EXTI_Trigger = EXTI_Trigger_Falling;
     exti.EXTI_LineCmd = ENABLE;
     EXTI_Init(&exti);
 
@@ -301,9 +301,9 @@ void setup_mrf_irqs(void)
 }
 
 void handle_rx(mrf_rx_info_t *rxinfo, uint8_t *rx_buffer) {
-    kkputs("Received a packet bytes long\n");
+    kkputs("Rx:\n");
     phex(rxinfo->frame_length);
-    kkputs("Packet data:\n");
+    kkputs("Data:\n");
     for (int i = 0; i <= rxinfo->frame_length; i++) {
         phex(rx_buffer[i]);
     }
@@ -311,11 +311,12 @@ void handle_rx(mrf_rx_info_t *rxinfo, uint8_t *rx_buffer) {
     phex(rxinfo->lqi);
     kkputs(" RSSI=");
     phex(rxinfo->rssi);
+    kkputc('\n');
 }
  
 void handle_tx(mrf_tx_info_t *txinfo) {
     if (txinfo->tx_ok) {
-        kkputs("TX went ok, got ack\n");
+        kkputs("TX went ok!\n");
     } else {
         kkputs("TX failed after %d retries\n");
         phex(txinfo->retries);
@@ -342,8 +343,17 @@ int main(void)
     mrf_pan_write(0xcafe);
     // set our address
     mrf_address16_write(0x3232);
-    kkputs("setup mrf address");
+    //mrf_address16_write(1);
+    kkputs("YO! What's up?!\n");
+    delay_ms(10);
+    kkputs("...mrf address and enabling interrupts\n");
     
+    uint16_t pan_r = mrf_pan_read();
+    uint16_t s16 = mrf_address16_read();
+    kkputs("\npan| s16, read back, are:");
+    phex16(pan_r);kkputs("|");phex16(s16);
+    kkputs("\n");
+
     kpacket2 packet;
     packet.header = 'x';
     packet.versionCount = VERSION_COUNT(KPP_VERSION_2, 1);
@@ -355,18 +365,19 @@ int main(void)
         while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0)
             ;
         uint16_t pot_val = ADC_GetConversionValue(ADC1);
-        
+
         // Call this pretty often, at least as often as you expect to be receiving packets
         mrf_check_flags(&handle_rx, &handle_tx);
         if (millis() - 2000 > lasttime_msg) {
             GPIO_TOGGLE(GPIOB, LED_GREEN);
             ksensor s1 = {KPS_SENSOR_TEST, pot_val};
             packet.ksensors[0] = s1;
-            kkputs("\ntxing...:");phex16(pot_val);kkputc('\n');
-            kkputs("sizeof kpacket2 = ");phex16(sizeof(kpacket2));
-            mrf_send16(1, sizeof(kpacket2), (char*)&packet);
+            kkputs("txing...:");
+            phex16(pot_val);
+            kkputc('\n');
+            mrf_send16(1, sizeof(kpacket2), (char*) &packet);
             lasttime_msg = millis();
         }
-
+        
     }
 }

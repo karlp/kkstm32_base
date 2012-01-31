@@ -13,6 +13,7 @@ extern "C" {
 #endif
 
     int64_t millis(void);
+    void delay_us(int us);
     void delay_ms(int ms);
     void systick_ms_init(void);
     

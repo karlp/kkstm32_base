@@ -174,15 +174,15 @@ extern "C" {
 #include <stdint.h>
 
 
-typedef struct _mrf_rx_info {
+typedef struct __attribute__((packed)) _mrf_rx_info {
     uint8_t frame_length;
-    uint8_t frame_type:3;
-    uint8_t security_enabled:1;
-    uint8_t ack_bit:1;
-    uint8_t pan_compression:1;
-    uint8_t frame_version:2;
-    uint8_t dest_addr_mode:2;
-    uint8_t src_addr_mode:2;
+    uint8_t frame_type;
+    uint8_t security_enabled;
+    uint8_t ack_bit;
+    uint8_t pan_compression;
+    uint8_t frame_version;
+    uint8_t dest_addr_mode;
+    uint8_t src_addr_mode;
     uint8_t sequence_number;
     uint8_t lqi;
     uint8_t rssi;
@@ -191,10 +191,10 @@ typedef struct _mrf_rx_info {
 /**
  * Based on the TXSTAT register, but "better"
  */
-typedef struct _mrf_tx_info {
-    uint8_t tx_ok:1;
-    uint8_t retries:2;
-    uint8_t channel_busy:1;
+typedef struct __attribute__((packed)) _mrf_tx_info {
+    uint8_t tx_ok;
+    uint8_t retries;
+    uint8_t channel_busy;
 } mrf_tx_info_t;
 
 void mrf_init(void);
