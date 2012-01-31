@@ -360,6 +360,10 @@ int main(void)
     kpacket2 packet;
     packet.header = 'x';
     packet.versionCount = VERSION_COUNT(KPP_VERSION_2, 1);
+    ksensor empty_sensor = {0, 0};
+    packet.ksensors[1] = empty_sensor;
+    packet.ksensors[2] = empty_sensor;
+    packet.ksensors[3] = empty_sensor;
 
     while (1) {
         // start and wait for adc to convert...
