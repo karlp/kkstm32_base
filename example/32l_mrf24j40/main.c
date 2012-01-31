@@ -235,7 +235,7 @@ void setup_spi(void) {
   spi.SPI_DataSize = SPI_DataSize_8b;
   spi.SPI_NSS = SPI_NSS_Soft;
   // Fpclk / 16, should be safe enough, mrf says it goes to 20Mhz
-  spi.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_64;
+  spi.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32;
   // These seem to be correct with MRF manual
   spi.SPI_CPOL = SPI_CPOL_Low;
   spi.SPI_CPHA = SPI_CPHA_1Edge;
