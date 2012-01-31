@@ -278,10 +278,10 @@ void setup_mrf_irqs(void)
     mrf_irq.GPIO_Mode = GPIO_Mode_IN;
     mrf_irq.GPIO_PuPd = GPIO_PuPd_NOPULL;
     mrf_irq.GPIO_Pin = GPIO_Pin_2;
-    GPIO_Init(GPIOC, &mrf_irq);
+    GPIO_Init(GPIOB, &mrf_irq);
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOC, EXTI_PinSource2);
+    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource2);
 
     EXTI_InitTypeDef exti;
     exti.EXTI_Line = EXTI_Line2;
