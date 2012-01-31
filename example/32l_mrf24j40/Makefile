@@ -14,7 +14,7 @@ STM32_BASE=../..
 STLINK_HOME=/home/karlp/src/stlink
 
 
-CFLAGS=-O1 -mlittle-endian -mthumb
+CFLAGS=-Os -mlittle-endian -mthumb
 CFLAGS+=-mcpu=cortex-m3
 CFLAGS+=-ffreestanding -nostdlib -nostdinc
 CFLAGS+=-Wall -Wextra -std=c99
