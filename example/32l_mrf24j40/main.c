@@ -343,9 +343,6 @@ int main(void)
     mrf_pan_write(0xcafe);
     // set our address
     mrf_address16_write(0x3232);
-    //mrf_address16_write(1);
-    kkputs("YO! What's up?!\n");
-    delay_ms(10);
     kkputs("...mrf address and enabling interrupts\n");
     
     uint16_t pan_r = mrf_pan_read();

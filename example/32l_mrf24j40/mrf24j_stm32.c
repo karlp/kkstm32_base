@@ -24,7 +24,7 @@ void mrf_select(void) {
 }
 
 void mrf_deselect(void) {
-    _delay_ms(2);
+    _delay_ms(1);
     GPIO_HIGH(PORT_MRF_CHIPSELECT, PIN_MRF_CHIPSELECT);
     _delay_ms(1);
 }
@@ -43,5 +43,5 @@ void mrf_reset(void) {
  */
 void _delay_ms(int ms) {
     //delay_ms(ms);
-    delay_us(100 * ms);
+    delay_us(50 * ms);
 }
