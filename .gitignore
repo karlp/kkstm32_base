@@ -5,3 +5,5 @@
 *.log
 *.map
 libs_stm/build/*.a
+*/*/nbproject/private/
+*/nbproject/private/
