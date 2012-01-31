@@ -16,7 +16,9 @@ STLINK_HOME=/home/karlp/src/stlink
 
 CFLAGS=-Os -mlittle-endian -mthumb
 CFLAGS+=-mcpu=cortex-m3
-CFLAGS+=-ffreestanding -nostdlib -nostdinc
+CFLAGS+=-ffreestanding
+CFLAGS+=-nostdlib
+CFLAGS+=-nostdinc
 CFLAGS+=-Wall -Wextra -std=c99
 ifeq ($(DEBUG),1)
         CFLAGS+=-g
@@ -41,6 +43,7 @@ CFLAGS+=-I$(LIBS_STM_PATH)/inc/core_support
 CFLAGS+=-I$(LIBS_STM_PATH)/inc/device_support
 CFLAGS+=-I$(LIBS_STM_PATH)/inc/$(PLATFORM)
 
+#LDFLAGS+=-lnosys # this should provide syscalls for us.
 LDFLAGS+=-L$(LIBS_STM_PATH)/build -lstm32_stdperiph_l1xx
 LDFLAGS+=-L$(STM32_BASE)/ld_scripts
 LDFLAGS+=-Wl,-Map=$(TARGET).map
