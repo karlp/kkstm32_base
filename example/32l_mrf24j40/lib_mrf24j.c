@@ -6,6 +6,7 @@
 
 // aMaxPHYPacketSize = 127, from the 802.15.4-2006 standard.
 static uint8_t mrf_rx_buf[127];
+static uint8_t ignore_bytes = 0;
 
 volatile uint8_t flag_got_rx;
 volatile uint8_t flag_got_tx;
@@ -63,6 +64,10 @@ void mrf_pan_write(uint16_t panid) {
     mrf_write_short(MRF_PANIDL, panid & 0xff);
 }
 
+void mrf_set_ignorebytes(uint8_t count) {
+    ignore_bytes = count;
+}
+
 void mrf_address16_write(uint16_t address16) {
     mrf_write_short(MRF_SADRH, address16 >> 8);
     mrf_write_short(MRF_SADRL, address16 & 0xff);
@@ -109,7 +114,11 @@ void mrf_send16(uint16_t dest16, uint8_t len, char * data) {
     mrf_write_long(i++, src16 & 0xff); // src16 low
     mrf_write_long(i++, src16 >> 8); // src16 high
 
-    i+=2;  // All testing seems to indicate that the next two bytes are ignored.
+    /*
+     * This is used to adjust for Maxstream headers inserted between
+     * 802.15.4. headers and data payload.
+     */
+    i += ignore_bytes;
     for (int q = 0; q < len; q++) {
         mrf_write_long(i++, data[q]);
     }

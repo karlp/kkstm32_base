@@ -208,6 +208,16 @@ void mrf_pan_write(uint16_t panid);
 
 void mrf_promiscuous(uint8_t enabled);
 
+/**
+ * Ignore count bytes after the 802.15.4 mac header, before the data frame.
+ * This is needed when communicating with xbee series 1 modules in their default
+ * mode, which includes a 2 byte Maxstream header.
+ * Either set _this_ device to ignore those 2 bytes, or use the "MM" command
+ * on the xbee to strictly follow 802.15.4 standards.
+ * @param count number of bytes to skip before data frame starts
+ */
+void mrf_set_ignorebytes(uint8_t count);
+
 void mrf_address16_write(uint16_t address16);
 uint16_t mrf_address16_read(void);
 

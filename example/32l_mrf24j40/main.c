@@ -345,6 +345,7 @@ int main(void)
     mrf_deselect();
 
     mrf_init();
+    mrf_set_ignorebytes(0);
     // set the pan id to use
     mrf_pan_write(0xcafe);
     // set our address
