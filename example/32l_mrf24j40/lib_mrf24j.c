@@ -95,7 +95,7 @@ void mrf_send16(uint16_t dest16, uint8_t len, char * data) {
 
     int i = 0;
     mrf_write_long(i++, 9);  // header length
-    mrf_write_long(i++, 9+2+len); //+2 is because module seems to ignore 2 bytes after the header?!
+    mrf_write_long(i++, 9+ignore_bytes+len);
 
 // 0 | pan compression | ack | no security | no data pending | data frame[3 bits]
     mrf_write_long(i++, 0b01100001); // first byte of Frame Control
