@@ -70,6 +70,6 @@ clean:
 	rm -rf $(BIN_IMAGE)
 
 write: all
-	$(STLINK_HOME)/flash/flash write $(BIN_IMAGE) 0x08000000
+	$(STLINK_HOME)/flash/st-flash write $(BIN_IMAGE) 0x08000000
 
 .PHONY: all clean write
